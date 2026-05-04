@@ -1,0 +1,54 @@
+# Decisions
+
+ToolRoute's v1 scope was crystallized in a two-round design session with
+four personas — Matt Pocock, Theo Browne, Addy Osmani, and Guillermo
+Rauch — captured at
+[`context/final.md`](https://github.com/toolroute/toolroute/blob/main/context/final.md).
+Mean score 8.5/10, four-persona unanimity on the playground cut, +1.5
+round-over-round.
+
+The pages below pull the load-bearing decisions out of that session and
+explain the reasoning. They are short on purpose. If a v2 ticket starts
+pulling on something cut here, the discussion belongs on its decision
+page, not on the v1 ticket.
+
+## Pages
+
+- [**Runtime before types**](/decisions/runtime-before-types) — why the
+  50-line guard shipped first, with a recorded terminal session of a
+  real rejection, before any type code was written.
+- [**Single source of truth**](/decisions/single-source-of-truth) — why
+  `nextAllowed` lives on the tool itself, why
+  `createRouterFromTools` derives the name set from the array, and why
+  there is no separate registry.
+- [**No playground in v1**](/decisions/no-playground-in-v1) — why the
+  unanimous round-2 cut of the live Cloudflare playground is correct,
+  and what replaces it (recorded terminal + side-by-side diff).
+- [**Vercel AI SDK coupling**](/decisions/vercel-ai-sdk-coupling) — why
+  Vercel-only in v1, what `COMPATIBILITY.md` and the weekly CI cron buy
+  us, and how the `routerVersion` diagnostic field surfaces drift at
+  runtime.
+
+## Persona quotes
+
+> "Right — so the insight here is that `createRouterFromTools` makes
+> the array the single source of truth, which means the type system
+> and the runtime guard are describing the *same* thing, not two
+> separate bets on what the developer remembered to keep in sync."
+> — **Matt Pocock**, round 2 (9/10)
+
+> "What if the Vercel AI SDK already knew which tool was allowed to
+> fire next — not from a system prompt, but from the type signature
+> itself?"
+> — **Guillermo Rauch**, round 2 (9/10)
+
+> "OK so here's the thing — the runtime guard going in before the
+> types is not a minor detail, that IS the idea, and without it
+> you're just shipping vibes.ts."
+> — **Theo Browne**, round 2 (8/10)
+
+> "In practice, the recorded terminal session showing the rejection
+> fires before a single type annotation is written — that sequencing
+> tells me the runtime guarantee is real, not just a well-intentioned
+> compile-time lie."
+> — **Addy Osmani**, round 2 (8/10)

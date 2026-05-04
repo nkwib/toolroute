@@ -1,0 +1,91 @@
+<script>
+  import RouterGraph from '$lib/components/RouterGraph.svelte';
+</script>
+
+# Single source of truth
+
+> "Right — so the insight here is that `createRouterFromTools` makes the
+> array the single source of truth, which means the type system and the
+> runtime guard are describing the *same* thing, not two separate bets
+> on what the developer remembered to keep in sync."
+> — **Matt Pocock** (round 2, 9/10)
+
+## What we did
+
+`nextAllowed` is declared **inline on the tool itself**, via
+`defineTool`. The router constructor takes a const tuple of
+`defineTool` outputs and **derives** the name union from
+`tools[number]['name']`. There is no:
+
+- separate name registry,
+- separate adjacency declaration,
+- separate type-level mapping the developer has to keep in sync with
+  the runtime mapping.
+
+```ts
+const search  = defineTool({ name: 'search',  nextAllowed: ['review']  as const, /* ... */ });
+const review  = defineTool({ name: 'review',  nextAllowed: ['commit']  as const, /* ... */ });
+const commit  = defineTool({ name: 'commit',  nextAllowed: []          as const, /* ... */ });
+
+const router = createRouterFromTools([search, review, commit] as const, {
+  strictMode: true,
+});
+```
+
+<RouterGraph highlight="legal" />
+
+## Why
+
+Round 1's draft proposal had a *separate* `defineGraph({ search:
+['review'] })` next to the tool definitions. Pocock pushed back hard:
+that's two declarations the developer has to keep aligned, and renames
+silently break one without breaking the other. The pivot — drive the
+union from the array literal — collapses the two declarations into
+one. Both layers (the inferred `NextTools<R, Prev>` type and the
+runtime adjacency map the guard reads) consult the **same**
+`nextAllowed` array.
+
+Three concrete consequences:
+
+1. **Renames are mechanical.** Rename `review` → `inspect` at its
+   `defineTool` site. Every other tool that listed `'review'` in its
+   `nextAllowed` is now a TypeScript error at *its* site, not yours.
+2. **The compile error and the runtime message reference the same
+   names.** A Sentry alert showing `legalNext: ['review']` matches the
+   IDE's `'commit' does not exist in type '{ review: ... }'` —
+   verbatim.
+3. **The graph is inspectable from one place.** `printRouterGraph`
+   reads `router.adjacency`, which is a literal copy of the
+   `nextAllowed` arrays. There is no second view of the graph that
+   could disagree.
+
+## How `createRouterFromTools` enforces it
+
+```ts
+function createRouterFromTools<const Tools extends readonly ToolRouteDef[]>(
+  tools: Tools,
+  options?: RouterOptions,
+): Router<Tools> {
+  const names = new Set(tools.map((t) => t.name));
+  for (const t of tools) {
+    for (const n of t.nextAllowed) {
+      if (!names.has(n)) {
+        throw new Error(
+          `[ToolRoute] Tool '${t.name}' references unknown tool '${n}' in nextAllowed.`,
+        );
+      }
+    }
+  }
+  // ... wrapped tools and adjacency map are derived from the same array
+}
+```
+
+The same check runs at the type level via the literal `nextAllowed`
+tuples plus `tools[number]['name']` — the TypeScript error fires before
+the constructor ever runs.
+
+## Related
+
+- [`src/define-tool.ts`](https://github.com/toolroute/toolroute/blob/main/src/define-tool.ts)
+- [`src/router.ts`](https://github.com/toolroute/toolroute/blob/main/src/router.ts)
+- [`src/narrow.ts`](https://github.com/toolroute/toolroute/blob/main/src/narrow.ts)

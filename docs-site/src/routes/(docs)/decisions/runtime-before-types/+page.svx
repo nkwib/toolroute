@@ -1,0 +1,104 @@
+<script>
+  import DemoTerminal from '$lib/components/DemoTerminal.svelte';
+  import Callout from '$lib/components/Callout.svelte';
+
+  const spikeRunBody = `<span class="prompt">$</span> pnpm tsx examples/code-review-agent/run.ts
+[runner] router=<span class="str">toolroute@0.1.0+ai-sdk@6.0.174</span>
+[runner] strictMode=<span class="kw">true</span>
+[runner] planned calls: search -&gt; commit
+
+[runner] tool-call: <span class="fn">search</span>
+[runner] tool-result: <span class="fn">search</span> -&gt; &lbrace; hits: [...], query: <span class="str">"login"</span> &rbrace;
+[runner] tool-call: <span class="fn">commit</span>
+<span class="err">[runner] BLOCKED: ToolRoute violation: 'commit' called after 'search';
+         legal next: [review] (toolroute@0.1.0+ai-sdk@6.0.174)</span>
+<span class="prompt">$</span> echo <span class="str">"exit=$?"</span>
+exit=<span class="num">1</span>`;
+</script>
+
+# Runtime before types
+
+> "OK so here's the thing — the runtime guard going in before the types
+> is not a minor detail, that IS the idea, and without it you're just
+> shipping vibes.ts."
+> — **Theo Browne** (round 2)
+
+## What we did
+
+We built the 50-line runtime guard first — a pure function
+`checkTransition(prev, next, adjacency, strictMode, routerVersion)` —
+and wired it into the three-tool code-review agent fixture. We
+**recorded the terminal session** of a real `streamText` run rejecting
+`commit` before `review` with `strictMode: true`. Only after that
+recording was committed did we layer the type machinery (`defineTool`,
+`createRouterFromTools`, `NextTools<R, Prev>`) on top.
+
+The captured run from the spike (issue 001 in the project tracker) — pure
+runtime, no type machinery:
+
+<DemoTerminal filename="issue-001 spike · runtime guard only" body={spikeRunBody} />
+
+The committed cast file at
+[`assets/recordings/runtime-guard-spike.cast`](https://github.com/toolroute/toolroute/blob/main/assets/recordings/runtime-guard-spike.cast)
+is replayable locally with `npx asciinema play …` — same bytes, no JS.
+
+## Why
+
+If the type narrowing came first and the runtime check trailed behind,
+two failure modes become invisible:
+
+1. **The narrowing could be wrong**, and you would never know — there is
+   no observable disagreement between code and runtime. Tests that
+   assert "this fails to compile" are easy to write; tests that assert
+   "this matches what actually happens at runtime" require a runtime to
+   compare against.
+2. **The runtime check could be skipped silently** in some code path
+   (e.g., a manual loop where the user uses `tool.execute` directly
+   without `streamText`). A type-first design tempts you into believing
+   the type is enough.
+
+Building the runtime first inverts both. The narrowing is then forced
+to *match* observable behaviour, not merely *describe* it. Addy Osmani
+flagged this exactly in round 2:
+
+> "The recorded terminal session showing the rejection fires before a
+> single type annotation is written — that sequencing tells me the
+> runtime guarantee is real, not just a well-intentioned compile-time
+> lie."
+
+## How we keep it honest
+
+The package ships a single integration test that runs the same fixture
+through both layers and asserts they reject the **same** offending
+call:
+
+```ts
+// test/integration.test.ts
+const legal = legalNextFor(router.adjacency, 'search');
+expect(legal).toEqual(['review']);          // runtime view
+expect(legal).not.toContain('commit');
+
+await tools.search.execute({ query: 'q' }, ctx);
+await expect(
+  tools.commit.execute({ message: 'm' }, ctx),
+).rejects.toBeInstanceOf(ToolRouteViolation); // runtime guard
+```
+
+Plus a type-level snapshot in `test/narrow.test-d.ts` asserting
+`keyof NextTools<typeof router, 'search'>` is exactly `'review'`. If
+either layer drifts, both tests fail loudly.
+
+<Callout kind="info" title="Two recordings, one rejection">
+  The repo ships two casts in <code>assets/recordings/</code>:
+  <code>runtime-guard-spike.cast</code> (this page — runtime only,
+  pre-types) and <code>readme-hero.cast</code> (type-level rejection +
+  runtime, side by side). Both reject the same offending call. The
+  difference is what evidence the cast carries.
+</Callout>
+
+## Related
+
+- The full spike acceptance criteria live in
+  [`issues/001-runtime-guard-spike.md`](https://github.com/toolroute/toolroute/blob/main/issues/001-runtime-guard-spike.md).
+- The 50-LOC guard module is at
+  [`src/guard.ts`](https://github.com/toolroute/toolroute/blob/main/src/guard.ts).

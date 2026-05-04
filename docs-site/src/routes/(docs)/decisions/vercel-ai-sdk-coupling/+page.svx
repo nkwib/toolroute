@@ -1,0 +1,93 @@
+<script>
+  import Callout from '$lib/components/Callout.svelte';
+</script>
+
+# Vercel AI SDK coupling
+
+## What we did
+
+ToolRoute v1 targets **only** the Vercel AI SDK as a peer dependency
+(`ai >= 6.0.0 < 7`). No Anthropic SDK adapter. No abstract "model
+provider" facade. The router builds `streamText`-shaped tools directly
+from the wrapped definitions.
+
+To compensate, we ship three concrete mitigations for the SDK-coupling
+risk:
+
+1. [`COMPATIBILITY.md`](/compatibility) — a public, dated changelog of
+   every SDK version we test against.
+2. **Weekly CI cron** (`.github/workflows/sdk-compat.yml`) — re-runs
+   the entire suite against `ai@latest` every Monday at 09:00 UTC.
+   Failures auto-open an issue tagged `sdk-drift`.
+3. **`routerVersion` diagnostic field** on every `ToolRouteViolation`
+   (`toolroute@0.1.0+ai-sdk@6.0.174`). A Sentry triage paste tells you
+   which SDK was on the box.
+
+## Why
+
+Three of the four personas (Pocock, Theo, Rauch) flagged SDK coupling
+as the structural ceiling on the project's lifetime — the SDK's
+tool-call shape changed twice in 12 months. The risk is real, and the
+mitigation is *not* a provider-agnostic abstraction.
+
+Two reasons we did not abstract:
+
+1. **Two adapters means two surfaces with subtly different semantics.**
+   The Vercel AI SDK has a specific `Tool<INPUT, OUTPUT>` shape with
+   `inputSchema: FlexibleSchema`, `needsApproval`, `onInputStart`,
+   `toModelOutput`, etc. Anthropic's tool-use API has a different shape
+   with different nullability conventions. A "neutral" abstraction
+   would force every consumer to learn a third surface, and would lag
+   both upstreams.
+2. **The audience is Vercel users.** Rauch round 2: *"the router is a
+   calling card, not a revenue vehicle."* Calling cards work by being
+   sharp at one thing, not by spanning two. The README hero recording
+   is a Vercel SDK demo; the launch thread says "Vercel"; the
+   `routerVersion` includes `ai-sdk@`. Every distribution surface
+   reinforces the focus.
+
+## What "drift" looks like in practice
+
+The CI cron is the canary. When the SDK ships a tool-shape change in a
+minor:
+
+```yaml
+# .github/workflows/sdk-compat.yml
+- name: Open issue on failure
+  if: steps.run.outcome == 'failure'
+  uses: actions/github-script@v7
+  with:
+    script: |
+      const sdk = '${{ steps.bump.outputs.sdk_version }}';
+      const title = `sdk-drift: ai@${sdk} broke the suite`;
+      // ... opens issue with workflow run link, suspected cause, ...
+```
+
+The `sdk-drift` label exists for exactly this. The dated row in
+`COMPATIBILITY.md` flips from `✅ pass` to `❌ fail` (or `⚠️ partial`
+when there is a documented workaround).
+
+<Callout kind="warn" title="If you're running ahead">
+  Every <code>ToolRouteViolation</code> carries the
+  <code>routerVersion</code> string. If a Sentry issue title shows an
+  SDK version newer than the latest row in
+  <a href="/compatibility">COMPATIBILITY.md</a>, your app is running
+  ahead of our tested matrix. Open an <code>sdk-drift</code> issue and
+  link the version.
+</Callout>
+
+## What v2 might look like
+
+The Anthropic SDK adapter is in
+[`issues/999-v2-deferred.md`](https://github.com/toolroute/toolroute/blob/main/issues/999-v2-deferred.md).
+The trigger condition for picking it up is **a clear ToolRoute v1
+adoption signal among Vercel users** — until that exists, an Anthropic
+adapter is scope creep that delays the actual calling-card moment.
+
+## Related
+
+- [Compatibility table](/compatibility)
+- The CI workflow:
+  [`sdk-compat.yml`](https://github.com/toolroute/toolroute/blob/main/.github/workflows/sdk-compat.yml)
+- The `routerVersion` builder:
+  [`src/version.ts`](https://github.com/toolroute/toolroute/blob/main/src/version.ts)
