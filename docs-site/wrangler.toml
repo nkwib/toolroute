@@ -1,0 +1,9 @@
+# Cloudflare Workers + Static Assets configuration for the ToolRoute docs site.
+# Deployed via `wrangler deploy` after `pnpm build` produces ./build.
+
+name = "toolroute"
+compatibility_date = "2026-05-04"
+
+[assets]
+directory = "./build"
+not_found_handling = "404-page"
