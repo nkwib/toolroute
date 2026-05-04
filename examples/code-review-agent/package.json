@@ -1,0 +1,15 @@
+{
+  "name": "code-review-agent-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Three-tool fixture used by ToolRoute for the runtime-guard recording and README hero.",
+  "scripts": {
+    "run": "tsx run.ts",
+    "run:warn": "TOOLROUTE_STRICT=0 tsx run.ts"
+  },
+  "peerDependencies": {
+    "ai": ">=6.0.0 <7",
+    "zod": ">=3.23.0 <5"
+  }
+}
