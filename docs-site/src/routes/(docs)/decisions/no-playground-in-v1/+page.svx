@@ -1,0 +1,79 @@
+<script>
+  import DemoTerminal from '$lib/components/DemoTerminal.svelte';
+  import Callout from '$lib/components/Callout.svelte';
+
+  const replacementBody = `<span class="cmt"># Same illegal call. Type-level + runtime, side by side.</span>
+<span class="prompt">$</span> tsc --noEmit examples/code-review-agent/illegal-call.demo.ts
+<span class="err">illegal-call.demo.ts(43,5): TS2353: 'commit' does not exist in type
+'&lbrace; review: SDKToolFor&lt;…&gt; &rbrace;'.</span>
+
+<span class="prompt">$</span> pnpm tsx examples/code-review-agent/run.ts
+[runner] tool-call: <span class="fn">search</span>
+[runner] tool-call: <span class="fn">commit</span>
+<span class="err">[runner] BLOCKED: ToolRoute violation: 'commit' called after 'search';
+         legal next: [review] (toolroute@0.1.0+ai-sdk@6.0.174)</span>`;
+</script>
+
+# No playground in v1
+
+## What we did
+
+We **cut** the live Cloudflare playground from v1. All four personas in
+round 2 independently agreed. A static side-by-side raw-SDK vs ToolRoute
+diff plus the captured rejection below — both committed to the repo —
+are the calling card instead.toolroute@0.1.0
+
+<DemoTerminal filename="what replaces the playground" body={replacementBody} />
+
+## Why
+
+A live playground inside a Cloudflare Worker would have meant:
+
+- A model proxy (or BYO API key flow) — net new product surface, with
+  abuse and rate-limit concerns.
+- A streaming UI — a frontend project that competes for attention with
+  the package itself.
+- A v2-shaped maintenance commitment from day one, when the package
+  is supposed to be "solo-shippable in ≤ 2 weeks."
+
+Theo Browne's round 2 quote: *"paid tier would be a distraction at this
+stage and the audience (solo devs, small teams) needs to trust it
+first."* Same reasoning applies to a playground — it is high-glamour
+infrastructure that delays shipping the actual primitive.
+
+The recording is the simpler artefact that does the same job:
+
+1. It shows the type-level rejection (`tsc` error on the illegal hop).
+2. It shows the runtime rejection (`ToolRouteViolation` thrown at
+   execution time).
+3. It plays back deterministically — the cast file is committed, so the
+   demo cannot bit-rot the way a hosted playground silently can.
+4. It is **embeddable everywhere**: the README, the docs site, the
+   launch thread, a Slack channel. A playground only works in a
+   browser.
+
+## What v2 might look like
+
+If the package gains traction and a playground becomes worth the
+maintenance, it lives in `issues/999-v2-deferred.md`:
+
+> Live Cloudflare playground (cut UNANIMOUSLY by all four personas in
+> round 2; replaced by recorded terminal + side-by-side diff).
+
+The trigger condition is **adoption signal**, not calendar. If
+hand-typed examples are not enough for a meaningful chunk of users to
+form an opinion, *that* is when a playground stops being a distraction
+and starts being a learning tool.
+
+<Callout kind="info" title="The TS Playground link is the v1 substitute">
+  The "Open in TS Playground" CTA on the
+  <a href="/">landing page</a> and the <a href="/before-after">Before/After</a>
+  page deep-links into the official TypeScript Playground with the
+  narrowing demo prefilled. Visitors get the red-squiggle moment in a
+  real editor without us hosting any model infra.
+</Callout>
+
+## Related
+
+- [v2 deferred index](https://github.com/toolroute/toolroute/blob/main/issues/999-v2-deferred.md).
+- The recording itself: [`assets/recordings/readme-hero.cast`](https://github.com/toolroute/toolroute/blob/main/assets/recordings/readme-hero.cast).
