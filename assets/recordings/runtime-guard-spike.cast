@@ -1,0 +1,12 @@
+{"version":2,"width":100,"height":28,"timestamp":1746345600,"title":"ToolRoute runtime-guard spike (issue 001)","env":{"TERM":"xterm-256color","SHELL":"/bin/zsh"}}
+[0,"o","$ pnpm tsx examples/code-review-agent/run.ts\r\n"]
+[0.4,"o","[runner] router=toolroute@0.1.0+ai-sdk@6.0.174\r\n"]
+[0.5800000000000001,"o","[runner] strictMode=true\r\n"]
+[0.76,"o","[runner] planned calls: search -> commit\r\n"]
+[0.94,"o","\r\n"]
+[1.1199999999999999,"o","[runner] tool-call: search\r\n"]
+[1.2999999999999998,"o","[runner] tool-result: search -> {\"hits\":[\"src/login.ts\",\"test/login.test.ts\"],\"query\":\"login\"}\r\n"]
+[1.4799999999999998,"o","[runner] tool-call: commit\r\n"]
+[1.6599999999999997,"o","[runner] BLOCKED: ToolRoute violation: 'commit' called after 'search'; legal next: [review] (toolroute@0.1.0+ai-sdk@6.0.174)\r\n"]
+[1.8399999999999996,"o","[runner] prev=search next=commit legalNext=[review] router=toolroute@0.1.0+ai-sdk@6.0.174\r\n"]
+[2.0199999999999996,"o","$ echo \"exit=$?\"\r\nexit=1\r\n"]
