@@ -1,6 +1,6 @@
 # Changelog
 
-> Source: [`CHANGELOG.md`](https://github.com/toolroute/toolroute/blob/main/CHANGELOG.md)
+> Source: [`CHANGELOG.md`](https://github.com/nkwib/toolroute/blob/main/CHANGELOG.md)
 > at the repo root.
 
 ## 0.1.0 — 2026-05-04

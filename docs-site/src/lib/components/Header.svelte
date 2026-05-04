@@ -38,7 +38,7 @@
     <div class="actions">
       <a
         class="gh"
-        href="https://github.com/toolroute/toolroute"
+        href="https://github.com/nkwib/toolroute"
         target="_blank"
         rel="noopener"
         aria-label="GitHub repository"

@@ -4,10 +4,10 @@
 
 # Compatibility
 
-> Source: [`COMPATIBILITY.md`](https://github.com/toolroute/toolroute/blob/main/COMPATIBILITY.md)
+> Source: [`COMPATIBILITY.md`](https://github.com/nkwib/toolroute/blob/main/COMPATIBILITY.md)
 > at the repo root. The dated rows below are produced by the weekly CI
 > cron — see the workflow at
-> [`.github/workflows/sdk-compat.yml`](https://github.com/toolroute/toolroute/blob/main/.github/workflows/sdk-compat.yml).
+> [`.github/workflows/sdk-compat.yml`](https://github.com/nkwib/toolroute/blob/main/.github/workflows/sdk-compat.yml).
 
 ToolRoute pins to a peer range of the Vercel AI SDK. The structural
 ceiling on the project's lifetime is the SDK's tool-call shape — it has

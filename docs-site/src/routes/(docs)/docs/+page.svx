@@ -257,5 +257,5 @@ pages:
   product.
 - Mermaid/DOT graph renderer — `printRouterGraph` text adjacency in v1.
 
-See the [v2 deferred index](https://github.com/toolroute/toolroute/blob/main/issues/999-v2-deferred.md)
+See the [v2 deferred index](https://github.com/nkwib/toolroute/blob/main/issues/999-v2-deferred.md)
 for the canonical list.

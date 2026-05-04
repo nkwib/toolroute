@@ -75,5 +75,5 @@ and starts being a learning tool.
 
 ## Related
 
-- [v2 deferred index](https://github.com/toolroute/toolroute/blob/main/issues/999-v2-deferred.md).
-- The recording itself: [`assets/recordings/readme-hero.cast`](https://github.com/toolroute/toolroute/blob/main/assets/recordings/readme-hero.cast).
+- [v2 deferred index](https://github.com/nkwib/toolroute/blob/main/issues/999-v2-deferred.md).
+- The recording itself: [`assets/recordings/readme-hero.cast`](https://github.com/nkwib/toolroute/blob/main/assets/recordings/readme-hero.cast).

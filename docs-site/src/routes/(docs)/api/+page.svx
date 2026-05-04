@@ -6,7 +6,7 @@
 # API reference
 
 Every public symbol exported from `toolroute`. Source of truth:
-[`src/index.ts`](https://github.com/toolroute/toolroute/blob/main/src/index.ts).
+[`src/index.ts`](https://github.com/nkwib/toolroute/blob/main/src/index.ts).
 
 | Export | Kind | What it does |
 |---|---|---|

@@ -93,5 +93,5 @@ ToolRoute is MIT, ~340 LOC of source, 37 tests, weekly CI cron pinned against `a
 npm install toolroute
 ```
 
-Repo: https://github.com/toolroute/toolroute
-COMPATIBILITY.md: https://github.com/toolroute/toolroute/blob/main/COMPATIBILITY.md
+Repo: https://github.com/nkwib/toolroute
+COMPATIBILITY.md: https://github.com/nkwib/toolroute/blob/main/COMPATIBILITY.md
