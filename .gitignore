@@ -1,0 +1,13 @@
+node_modules
+dist
+.DS_Store
+*.tgz
+*.log
+coverage
+.vitest-cache
+
+# docs-site (SvelteKit + Cloudflare static assets)
+docs-site/node_modules
+docs-site/.svelte-kit
+docs-site/build
+docs-site/src/lib/generated
