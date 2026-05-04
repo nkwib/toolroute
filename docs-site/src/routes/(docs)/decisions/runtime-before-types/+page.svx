@@ -39,7 +39,7 @@ runtime, no type machinery:
 <DemoTerminal filename="issue-001 spike · runtime guard only" body={spikeRunBody} />
 
 The committed cast file at
-[`assets/recordings/runtime-guard-spike.cast`](https://github.com/toolroute/toolroute/blob/main/assets/recordings/runtime-guard-spike.cast)
+[`assets/recordings/runtime-guard-spike.cast`](https://github.com/nkwib/toolroute/blob/main/assets/recordings/runtime-guard-spike.cast)
 is replayable locally with `npx asciinema play …` — same bytes, no JS.
 
 ## Why
@@ -99,6 +99,6 @@ either layer drifts, both tests fail loudly.
 ## Related
 
 - The full spike acceptance criteria live in
-  [`issues/001-runtime-guard-spike.md`](https://github.com/toolroute/toolroute/blob/main/issues/001-runtime-guard-spike.md).
+  [`issues/001-runtime-guard-spike.md`](https://github.com/nkwib/toolroute/blob/main/issues/001-runtime-guard-spike.md).
 - The 50-LOC guard module is at
-  [`src/guard.ts`](https://github.com/toolroute/toolroute/blob/main/src/guard.ts).
+  [`src/guard.ts`](https://github.com/nkwib/toolroute/blob/main/src/guard.ts).

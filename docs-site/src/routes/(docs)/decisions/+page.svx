@@ -3,7 +3,7 @@
 ToolRoute's v1 scope was crystallized in a two-round design session with
 four personas — Matt Pocock, Theo Browne, Addy Osmani, and Guillermo
 Rauch — captured at
-[`context/final.md`](https://github.com/toolroute/toolroute/blob/main/context/final.md).
+[`context/final.md`](https://github.com/nkwib/toolroute/blob/main/context/final.md).
 Mean score 8.5/10, four-persona unanimity on the playground cut, +1.5
 round-over-round.
 

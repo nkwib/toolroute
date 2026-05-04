@@ -44,13 +44,13 @@
     "state-machine",
     "type-safety"
   ],
-  "homepage": "https://github.com/toolroute/toolroute#readme",
+  "homepage": "https://github.com/nkwib/toolroute#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/toolroute/toolroute.git"
+    "url": "https://github.com/nkwib/toolroute.git"
   },
   "bugs": {
-    "url": "https://github.com/toolroute/toolroute/issues"
+    "url": "https://github.com/nkwib/toolroute/issues"
   },
   "peerDependencies": {
     "ai": ">=6.0.0 <7",

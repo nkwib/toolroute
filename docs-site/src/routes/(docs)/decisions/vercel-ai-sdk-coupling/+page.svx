@@ -79,7 +79,7 @@ when there is a documented workaround).
 ## What v2 might look like
 
 The Anthropic SDK adapter is in
-[`issues/999-v2-deferred.md`](https://github.com/toolroute/toolroute/blob/main/issues/999-v2-deferred.md).
+[`issues/999-v2-deferred.md`](https://github.com/nkwib/toolroute/blob/main/issues/999-v2-deferred.md).
 The trigger condition for picking it up is **a clear ToolRoute v1
 adoption signal among Vercel users** — until that exists, an Anthropic
 adapter is scope creep that delays the actual calling-card moment.
@@ -88,6 +88,6 @@ adapter is scope creep that delays the actual calling-card moment.
 
 - [Compatibility table](/compatibility)
 - The CI workflow:
-  [`sdk-compat.yml`](https://github.com/toolroute/toolroute/blob/main/.github/workflows/sdk-compat.yml)
+  [`sdk-compat.yml`](https://github.com/nkwib/toolroute/blob/main/.github/workflows/sdk-compat.yml)
 - The `routerVersion` builder:
-  [`src/version.ts`](https://github.com/toolroute/toolroute/blob/main/src/version.ts)
+  [`src/version.ts`](https://github.com/nkwib/toolroute/blob/main/src/version.ts)

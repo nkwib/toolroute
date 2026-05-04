@@ -10,10 +10,10 @@
       <span class="muted">Typed routing graph for the Vercel AI SDK</span>
     </div>
     <div class="links">
-      <a href="https://github.com/toolroute/toolroute" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/nkwib/toolroute" target="_blank" rel="noopener">GitHub</a>
       <a href="https://www.npmjs.com/package/toolroute" target="_blank" rel="noopener">npm</a>
       <a
-        href="https://github.com/toolroute/toolroute/blob/main/LICENSE"
+        href="https://github.com/nkwib/toolroute/blob/main/LICENSE"
         target="_blank"
         rel="noopener">MIT License</a
       >

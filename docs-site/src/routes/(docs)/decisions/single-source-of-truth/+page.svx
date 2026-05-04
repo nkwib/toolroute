@@ -86,6 +86,6 @@ the constructor ever runs.
 
 ## Related
 
-- [`src/define-tool.ts`](https://github.com/toolroute/toolroute/blob/main/src/define-tool.ts)
-- [`src/router.ts`](https://github.com/toolroute/toolroute/blob/main/src/router.ts)
-- [`src/narrow.ts`](https://github.com/toolroute/toolroute/blob/main/src/narrow.ts)
+- [`src/define-tool.ts`](https://github.com/nkwib/toolroute/blob/main/src/define-tool.ts)
+- [`src/router.ts`](https://github.com/nkwib/toolroute/blob/main/src/router.ts)
+- [`src/narrow.ts`](https://github.com/nkwib/toolroute/blob/main/src/narrow.ts)
