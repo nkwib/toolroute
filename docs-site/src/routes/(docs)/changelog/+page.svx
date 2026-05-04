@@ -1,0 +1,28 @@
+# Changelog
+
+> Source: [`CHANGELOG.md`](https://github.com/toolroute/toolroute/blob/main/CHANGELOG.md)
+> at the repo root.
+
+## 0.1.0 — 2026-05-04
+
+Initial public release. Treated as a pre-1.0 calling card; a 1.0.0 cut
+will follow once the API has been used in anger.
+
+- `defineTool({ name, inputSchema, nextAllowed, execute })` — collocates
+  the legality graph with the tool itself.
+- `createRouterFromTools(tools, options)` — derives the name set from
+  the tool array; one source of truth.
+- Per-step narrowing helper `nextTools(router, prevName)` and the
+  underlying `NextTools<R, Prev>` type.
+- `ToolRouteViolation` with `prev` / `next` / `legalNext` /
+  `routerVersion` diagnostic fields. `strictMode: true` throws,
+  `strictMode: false` warns.
+- Edge-runtime detection (Vercel Edge, Cloudflare Workers,
+  `NEXT_RUNTIME=edge`) with a one-time init warning.
+- `printRouterGraph(router)` — deterministic plain-text adjacency dump,
+  zero deps.
+- `COMPATIBILITY.md` row stamped against `ai@6.0.174`. Weekly CI cron
+  runs the suite against `ai@latest`; failures open an issue tagged
+  `sdk-drift`.
+- README hero recording showing both type-level red squiggle and
+  runtime `ToolRouteViolation` for the same offending call.

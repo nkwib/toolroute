@@ -1,0 +1,310 @@
+<script>
+  import ApiSignature from '$lib/components/ApiSignature.svelte';
+  import Callout from '$lib/components/Callout.svelte';
+</script>
+
+# API reference
+
+Every public symbol exported from `toolroute`. Source of truth:
+[`src/index.ts`](https://github.com/toolroute/toolroute/blob/main/src/index.ts).
+
+| Export | Kind | What it does |
+|---|---|---|
+| [`defineTool`](#defineTool) | function | Wrap a tool definition with `nextAllowed`. |
+| [`createRouterFromTools`](#createRouterFromTools) | function | Build a router from a const tool array. |
+| [`nextTools`](#nextTools) | function | Narrow the legal next subset for a previous tool. |
+| [`printRouterGraph`](#printRouterGraph) | function | Plain-text adjacency dump. |
+| [`checkTransition`](#checkTransition) | function | Lower-level guard primitive. |
+| [`legalNextFor`](#legalNextFor) | function | Compute the legal-next set for a previous tool. |
+| [`detectEdgeRuntime`](#detectEdgeRuntime) | function | Edge-runtime probe. |
+| [`buildRouterVersion`](#buildRouterVersion) | function | Build the `routerVersion` diagnostic string. |
+| [`ToolRouteViolation`](#ToolRouteViolation) | class | Thrown / warned on illegal transitions. |
+| [`Router`](#Router) | type | Router shape. |
+| [`RouterOptions`](#RouterOptions) | type | Constructor options. |
+| [`ToolRouteDef`](#ToolRouteDef) | type | Tool-definition shape returned by `defineTool`. |
+| [`NextTools`](#NextTools) | type | Per-step narrowed tools record. |
+| [`SDKToolSet`](#SDKToolSet) | type | The `tools` record passed to `streamText`. |
+| [`SDKToolFor`](#SDKToolFor) | type | Single SDK tool inferred from a `ToolRouteDef`. |
+| [`Adjacency`](#Adjacency) | type | `Record<string, readonly string[]>`. |
+| [`TOOLROUTE_VERSION`](#TOOLROUTE_VERSION) | const | Current package version string. |
+| [`EDGE_INIT_WARNING`](#EDGE_INIT_WARNING) | const | One-time init warning text. |
+
+---
+
+<ApiSignature
+  id="defineTool"
+  name="defineTool"
+  kind="function"
+  signature={`function defineTool<
+  const Name extends string,
+  Schema extends FlexibleSchema,
+  const Next extends readonly string[],
+  Output = unknown
+>(def: ToolRouteDef<Name, Schema, Next, Output>): ToolRouteDef<Name, Schema, Next, Output>`}
+/>
+
+Pass-through helper that preserves literal types on `name` and tuple types
+on `nextAllowed`. Validates at runtime that `name` is non-empty,
+`nextAllowed` is an array, and `execute` is a function.
+
+```ts
+const search = defineTool({
+  name: 'search',
+  description: 'find files',
+  inputSchema: z.object({ query: z.string() }),
+  nextAllowed: ['review'] as const,
+  execute: async ({ query }) => ({ hits: [] }),
+});
+// typeof search.name           // 'search'
+// typeof search.nextAllowed    // readonly ['review']
+```
+
+<ApiSignature
+  id="createRouterFromTools"
+  name="createRouterFromTools"
+  kind="function"
+  signature={`function createRouterFromTools<
+  const Tools extends readonly ToolRouteDef[]
+>(tools: Tools, options?: RouterOptions): Router<Tools>`}
+/>
+
+Build a router from a const tuple of `defineTool` outputs. Validates that
+every `nextAllowed` reference exists, derives the name set, builds the
+adjacency map, and returns the wrapped `tools` record.
+
+**Throws** if a `nextAllowed` entry references an unknown tool, if the
+array is empty, or if there are duplicate names.
+
+```ts
+const router = createRouterFromTools([search, review, commit] as const, {
+  strictMode: true,
+});
+router.routerVersion // 'toolroute@0.1.0+ai-sdk@6.0.174'
+router.adjacency     // { search: ['review'], review: ['commit'], commit: [] }
+```
+
+<ApiSignature
+  id="nextTools"
+  name="nextTools"
+  kind="function"
+  signature={`function nextTools<R, Prev extends string | null>(
+  router: R, prev: Prev
+): NextTools<R, Prev>`}
+/>
+
+Returns a freshly built record containing only the legal next tools for
+the given `prev`. Use it when driving the agent yourself, one
+`streamText` step at a time. With `prev = null` the result is the entry
+set (every tool whose `nextAllowed` is non-empty).
+
+```ts
+await streamText({ model, tools: nextTools(router, 'search') });
+// type: { review: SDKToolFor<typeof review> }
+```
+
+<ApiSignature
+  id="printRouterGraph"
+  name="printRouterGraph"
+  kind="function"
+  signature={`function printRouterGraph(router: { adjacency: Adjacency }): string`}
+/>
+
+Returns a deterministic plain-text adjacency dump. Tools are sorted
+alphabetically; `nextAllowed` is sorted within each line; terminal tools
+print as `name -> (terminal)`. Zero runtime dependencies. Caller decides
+whether to write to stdout, a log sink, or a string snapshot.
+
+```text
+commit -> (terminal)
+review -> commit
+search -> review
+```
+
+<ApiSignature
+  id="checkTransition"
+  name="checkTransition"
+  kind="function"
+  signature={`function checkTransition(input: CheckTransitionInput): void`}
+/>
+
+The lower-level guard primitive that the router calls inside each
+wrapped `execute`. Throws `ToolRouteViolation` when `strictMode: true`,
+otherwise emits a single `warn` line. Useful if you want to layer the
+guard onto a non-router code path.
+
+```ts
+checkTransition({
+  prev: 'search',
+  next: 'commit',
+  adjacency: router.adjacency,
+  strictMode: true,
+  routerVersion: router.routerVersion,
+});
+// throws ToolRouteViolation
+```
+
+<ApiSignature
+  id="legalNextFor"
+  name="legalNextFor"
+  kind="function"
+  signature={`function legalNextFor(adjacency: Adjacency, prev: string | null): readonly string[]`}
+/>
+
+Pure helper. With `prev = null` returns the entry tools (those with a
+non-empty `nextAllowed`), sorted. With `prev = name` returns
+`adjacency[name]` or `[]` if the tool is terminal/unknown.
+
+<ApiSignature
+  id="detectEdgeRuntime"
+  name="detectEdgeRuntime"
+  kind="function"
+  signature={`function detectEdgeRuntime(): boolean`}
+/>
+
+Probes for `globalThis.EdgeRuntime`, `process.env.NEXT_RUNTIME === 'edge'`,
+and Cloudflare worker globals (`WebSocketPair`). Wrapped in try/catch and
+fails open (returns `false`) rather than throwing.
+
+<ApiSignature
+  id="buildRouterVersion"
+  name="buildRouterVersion"
+  kind="function"
+  signature={`function buildRouterVersion(opts: { packageVersion?: string; sdkVersion?: string }): string`}
+/>
+
+Returns `toolroute@<pkg>+ai-sdk@<peer>`. Defaults read from
+`TOOLROUTE_VERSION` and `ai/package.json`. Override `sdkVersion` to keep
+recording snapshots stable across SDK bumps in tests.
+
+<ApiSignature
+  id="ToolRouteViolation"
+  name="ToolRouteViolation"
+  kind="class"
+  signature={`class ToolRouteViolation extends Error {
+  readonly prev: string | null;
+  readonly next: string;
+  readonly legalNext: readonly string[];
+  readonly routerVersion: string;
+}`}
+/>
+
+Thrown by the router (or `checkTransition`) when an illegal hop is
+attempted in strict mode; passed to `warn` as a formatted message
+otherwise. The `message` is single-line so a copy-paste lands cleanly in
+a Sentry issue title.
+
+```ts
+try {
+  await tool.execute(input, ctx);
+} catch (err) {
+  if (err instanceof ToolRouteViolation) {
+    console.error(err.prev, err.next, err.legalNext, err.routerVersion);
+  }
+  throw err;
+}
+```
+
+<Callout kind="info" title="instanceof works in tests too">
+  The constructor calls <code>Object.setPrototypeOf</code>, so
+  <code>err instanceof ToolRouteViolation</code> works across module
+  boundaries even with downlevel transpilation.
+</Callout>
+
+<ApiSignature
+  id="Router"
+  name="Router"
+  kind="type"
+  signature={`interface Router<Tools extends readonly ToolRouteDef[]> {
+  tools: SDKToolSet<Tools>;
+  adjacency: Adjacency;
+  routerVersion: string;
+  strictMode: boolean;
+  reset(): void;
+}`}
+/>
+
+The shape returned by `createRouterFromTools`. `tools` is the SDK-shaped
+record you pass to `streamText`. `adjacency` is read-only. `reset()`
+clears the internal `prev` pointer — call it between agent runs that
+share the same router.
+
+<ApiSignature
+  id="RouterOptions"
+  name="RouterOptions"
+  kind="type"
+  signature={`interface RouterOptions {
+  strictMode?: boolean;             // default: false (warn)
+  warn?: (msg: string) => void;     // default: console.warn
+  sdkVersion?: string;              // default: read from ai/package.json
+  detectEdgeRuntime?: () => boolean; // default: built-in probe
+}`}
+/>
+
+<ApiSignature
+  id="ToolRouteDef"
+  name="ToolRouteDef"
+  kind="type"
+  signature={`interface ToolRouteDef<
+  Name extends string = string,
+  Schema extends FlexibleSchema = FlexibleSchema,
+  Next extends readonly string[] = readonly string[],
+  Output = unknown
+> {
+  name: Name;
+  description?: string;
+  inputSchema: Schema;
+  nextAllowed: Next;
+  execute: (input: InferSchema<Schema>, options: { toolCallId: string }) => Output | Promise<Output>;
+}`}
+/>
+
+<ApiSignature
+  id="NextTools"
+  name="NextTools"
+  kind="type"
+  signature={`type NextTools<R, Prev extends string | null> =
+  R extends Router<infer Tools>
+    ? { [N in AllowedNextNames<Tools, Prev>]: SDKToolFor<ToolByName<Tools, N>> }
+    : never;`}
+/>
+
+The legal next tools record for a given previous tool, at the type
+level. With `Prev = null`, the legal set is every tool whose
+`nextAllowed` is non-empty (i.e., every entry tool).
+
+<ApiSignature
+  id="SDKToolSet"
+  name="SDKToolSet"
+  kind="type"
+  signature={`type SDKToolSet<Tools extends readonly ToolRouteDef[]> = {
+  [K in Tools[number] as K['name']]: SDKToolFor<K>;
+};`}
+/>
+
+<ApiSignature
+  id="SDKToolFor"
+  name="SDKToolFor"
+  kind="type"
+  signature={`type SDKToolFor<T extends ToolRouteDef> = Tool<Infer<T['inputSchema']>, /* output */ unknown>;`}
+/>
+
+<ApiSignature
+  id="Adjacency"
+  name="Adjacency"
+  kind="type"
+  signature={`type Adjacency = Readonly<Record<string, readonly string[]>>;`}
+/>
+
+<ApiSignature
+  id="TOOLROUTE_VERSION"
+  name="TOOLROUTE_VERSION"
+  kind="const"
+  signature={`const TOOLROUTE_VERSION: '0.1.0';`}
+/>
+
+<ApiSignature
+  id="EDGE_INIT_WARNING"
+  name="EDGE_INIT_WARNING"
+  kind="const"
+  signature={`const EDGE_INIT_WARNING: '[ToolRoute] Edge runtime detected. console.warn may be suppressed; pipe runtime logs to capture violations.';`}
+/>
