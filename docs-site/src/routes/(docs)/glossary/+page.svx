@@ -1,0 +1,71 @@
+# Glossary
+
+A short reference for the vocabulary used across the docs and the
+[Decisions](/decisions) pages.
+
+### adjacency
+
+The `Record<string, readonly string[]>` mapping every tool name to the
+list of tool names it can hand off to. The router exposes it as
+`router.adjacency`. `printRouterGraph` is just a sorted string render of
+this record.
+
+### entry tool
+
+A tool whose `nextAllowed` is **non-empty** — i.e., a tool that is
+permitted to be called first in a run. Pure terminal tools (with empty
+`nextAllowed`) cannot be entry tools. The list is what `nextTools(router,
+null)` returns.
+
+### legal hop
+
+A `(prev, next)` pair where `next` appears in `adjacency[prev]`. The
+runtime guard accepts legal hops silently and updates the router's
+internal `prev` pointer.
+
+### loud guard
+
+Theo Browne's framing in the round-table session: a runtime check that
+throws or warns with a single-line message containing every diagnostic
+field a maintainer would ask for first. `ToolRouteViolation` is the loud
+guard.
+
+### nextAllowed
+
+The tuple of legal successor names declared inline on each tool via
+`defineTool`. The single source of truth: both the type narrowing
+(`NextTools`) and the runtime guard (`checkTransition`) read it; renames
+propagate without a separate registry.
+
+### routerVersion
+
+A string of the form `toolroute@<pkg>+ai-sdk@<peer>` that the router
+constructs at startup and threads into every `ToolRouteViolation`. Lets a
+3am Sentry triage tell which SDK version was on the box.
+
+### single source of truth
+
+The design pivot that drove Pocock and Rauch to 9/10 in round 2: the
+tool array — not a separate name registry — is the only place names are
+declared. `createRouterFromTools` derives the union from
+`tools[number]['name']`. See
+[Single source of truth](/decisions/single-source-of-truth).
+
+### strict mode
+
+`createRouterFromTools(tools, { strictMode: true })` makes the wrapped
+`execute` throw `ToolRouteViolation` on any illegal hop. The default
+(`strictMode: false`) calls `warn` and proceeds.
+
+### terminal tool
+
+A tool whose `nextAllowed` is the empty tuple `[] as const`. The runtime
+guard treats it as a sink: nothing is legal after it. `printRouterGraph`
+prints terminals as `name -> (terminal)`.
+
+### tool-set shape
+
+The `Record<string, Tool<INPUT, OUTPUT>>` shape that the Vercel AI SDK's
+`streamText` and `generateText` accept as their `tools` parameter. The
+router's `tools` field has this shape; the per-tool `execute` is wrapped
+with the guard.

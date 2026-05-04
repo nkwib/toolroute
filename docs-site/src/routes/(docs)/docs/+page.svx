@@ -1,0 +1,261 @@
+<script>
+  import Callout from '$lib/components/Callout.svelte';
+  import RouterGraph from '$lib/components/RouterGraph.svelte';
+  import DemoTerminal from '$lib/components/DemoTerminal.svelte';
+
+  const heroDemoBody = `<span class="cmt"># 1. tsc — compile-time rejection</span>
+<span class="prompt">$</span> tsc --noEmit examples/code-review-agent/illegal-call.demo.ts
+<span class="err">illegal-call.demo.ts(43,5): error TS2353: Object literal may only specify
+known properties, and 'commit' does not exist in type
+'&lbrace; review: SDKToolFor&lt;…&gt; &rbrace;'.</span>
+
+<span class="cmt"># 2. runtime — wrapped execute throws</span>
+<span class="prompt">$</span> pnpm tsx examples/code-review-agent/run.ts
+[runner] tool-call: <span class="fn">search</span>
+[runner] tool-result: <span class="fn">search</span> -&gt; &lbrace; hits: [...], query: <span class="str">"login"</span> &rbrace;
+[runner] tool-call: <span class="fn">commit</span>
+<span class="err">[runner] BLOCKED: ToolRoute violation: 'commit' called after 'search';
+         legal next: [review] (toolroute@0.1.0+ai-sdk@6.0.174)</span>`;
+</script>
+
+# Guide
+
+> Production agents on the Vercel AI SDK fail most often at **tool ordering** —
+> the model calls `send_email` before `draft_email`, or `commit` before
+> `review`. ToolRoute makes that a compile error and a runtime guard that
+> throws.
+
+ToolRoute is a Vercel AI SDK companion. Each tool declares its legal
+`nextAllowed` successors inline; `createRouterFromTools` derives the name
+set from the array; the typed `tools` record narrows per step; and a
+50-line runtime guard rejects illegal calls at the wrapped `execute`.
+
+<RouterGraph highlight="legal" />
+
+<h2 id="install">Install</h2>
+
+```bash
+pnpm add toolroute
+# peer deps
+pnpm add ai zod
+```
+
+`ai` is required (peer range `>=6.0.0 <7`). `zod` is optional but
+recommended — `inputSchema` accepts any [Standard Schema](https://standardschema.dev/)
+implementation.
+
+<h2 id="quickstart">Quickstart</h2>
+
+```ts
+import { defineTool, createRouterFromTools } from 'toolroute';
+import { streamText } from 'ai';
+import { z } from 'zod';
+
+const search = defineTool({
+  name: 'search',
+  inputSchema: z.object({ query: z.string() }),
+  nextAllowed: ['review'] as const,
+  execute: async ({ query }) => ({ hits: [`match for ${query}`] }),
+});
+
+const review = defineTool({
+  name: 'review',
+  inputSchema: z.object({ diff: z.string() }),
+  nextAllowed: ['commit'] as const,
+  execute: async ({ diff }) => ({ ok: true, notes: diff.slice(0, 80) }),
+});
+
+const commit = defineTool({
+  name: 'commit',
+  inputSchema: z.object({ message: z.string() }),
+  nextAllowed: [] as const,
+  execute: async ({ message }) => ({ sha: 'deadbeef', message }),
+});
+
+const router = createRouterFromTools([search, review, commit] as const, {
+  strictMode: true,
+});
+
+await streamText({ model, tools: router.tools, prompt: '...' });
+```
+
+If the model decides to call `commit` before `review`, the wrapped
+`execute` throws `ToolRouteViolation` with `prev: 'search'`,
+`next: 'commit'`, `legalNext: ['review']`, and a `routerVersion` string
+encoding both the package and the SDK peer version it was built against.
+
+<h2 id="define-tool">defineTool</h2>
+
+`defineTool` collocates the legality graph with the tool definition itself.
+That collocation is the load-bearing idea — both the type narrowing and
+the runtime guard read the same `nextAllowed` array, which means they
+cannot drift.
+
+```ts
+defineTool({
+  name: 'search',
+  description: 'Find files relevant to the change.',
+  inputSchema: z.object({ query: z.string() }),
+  nextAllowed: ['review'] as const,
+  execute: async ({ query }) => ({ /* ... */ }),
+});
+```
+
+- `name` is preserved at the type level as a literal.
+- `nextAllowed` is preserved as a tuple, not `string[]` — that is what
+  makes per-step narrowing possible.
+- `inputSchema` accepts any Vercel AI SDK `FlexibleSchema` (Zod, Standard
+  Schema, JSON Schema).
+
+The output of `defineTool` is structurally compatible with the SDK's
+`tool()` helper output. The router transforms the array into the
+`ToolSet` shape `streamText` expects.
+
+<h2 id="router">createRouterFromTools</h2>
+
+```ts
+const router = createRouterFromTools([search, review, commit] as const, {
+  strictMode: true,
+});
+```
+
+- Derives the union of legal tool names from `tools[number]['name']`.
+- Validates every `nextAllowed` reference at build time **and** runtime —
+  a typo is a TypeScript error, and the constructor also throws if a
+  reference is unknown.
+- Returns `{ tools, adjacency, routerVersion, strictMode, reset }`. Pass
+  `router.tools` to `streamText`; the wrapped `execute` consults the guard.
+
+The `routerVersion` field is `toolroute@<pkg>+ai-sdk@<peer>`. It is
+threaded into every `ToolRouteViolation`, so error titles in Sentry tell
+you which SDK was on the box.
+
+<Callout kind="info" title="One state machine per router">
+  The router holds a single `prev` pointer. Use one router per agent run,
+  or call <code>router.reset()</code> between runs. Concurrent
+  <code>streamText</code> calls sharing the same router will interleave.
+</Callout>
+
+<h2 id="per-step-narrowing">Per-step narrowing</h2>
+
+If you drive the agent yourself — a manual loop instead of `streamText`'s
+multi-step — `nextTools(router, prevName)` gives you the narrowed legal
+subset:
+
+```ts
+import { nextTools } from 'toolroute';
+
+await streamText({ model, tools: nextTools(router, null) });    // entry tools
+await streamText({ model, tools: nextTools(router, 'search') }); // { review }
+await streamText({ model, tools: nextTools(router, 'review') }); // { commit }
+```
+
+At the type level, `NextTools<typeof router, 'search'>` is exactly
+`{ review: SDKToolFor<typeof review> }` — `commit` is not in the
+type. That is the red squiggle in the README hero recording.
+
+<DemoTerminal filename="same illegal call · two layers" body={heroDemoBody} />
+
+<h2 id="strict-mode">strictMode</h2>
+
+```ts
+createRouterFromTools(tools, { strictMode: true });   // throws on violation
+createRouterFromTools(tools, { strictMode: false });  // warns on violation (default)
+```
+
+- **`strictMode: true`** — the wrapped `execute` throws
+  `ToolRouteViolation`. Use this in production once you trust your graph.
+- **`strictMode: false`** (default) — the wrapped `execute` calls `warn`
+  with a single-line diagnostic and proceeds. Useful while you are still
+  shaking the graph out.
+
+You can swap the default `console.warn` for a custom sink:
+
+```ts
+createRouterFromTools(tools, {
+  strictMode: false,
+  warn: (msg) => myLogger.warn(msg),
+});
+```
+
+<h2 id="edge-runtime">Edge runtime</h2>
+
+`console.warn` is **suppressed** in Vercel Edge Functions and Cloudflare
+Workers — a silent warn-mode would lose violations exactly where you
+need them. ToolRoute detects the runtime at router construction
+(checking `globalThis.EdgeRuntime`, `process.env.NEXT_RUNTIME === 'edge'`,
+and Cloudflare worker globals) and emits a one-time init warning:
+
+```text
+[ToolRoute] Edge runtime detected. console.warn may be suppressed;
+pipe runtime logs to capture violations.
+```
+
+The detection is wrapped in try/catch and fails open (skip the warning)
+rather than throwing. Pipe `warn:` to your own log sink in those
+environments.
+
+<h2 id="renames">Renames</h2>
+
+`createRouterFromTools` derives the name set from the tool array itself —
+so renaming a tool in one place propagates everywhere:
+
+```ts
+// rename `review` -> `inspect` at the tool definition site:
+const inspect = defineTool({ name: 'inspect', nextAllowed: ['commit'], /* ... */ });
+
+// every other tool that listed 'review' in nextAllowed is now a
+// TypeScript error at *its* definition site, not yours.
+```
+
+There is exactly one source of truth (the `name` field on the tool).
+There is no separate registry to keep in sync.
+
+<h2 id="errors">Errors</h2>
+
+`ToolRouteViolation extends Error` exposes:
+
+| Field | Type | Notes |
+|---|---|---|
+| `prev` | `string \| null` | Previous tool, or `null` at start of run. |
+| `next` | `string` | The offending tool the model wanted to call. |
+| `legalNext` | `readonly string[]` | What was allowed at this step. |
+| `routerVersion` | `string` | `toolroute@<pkg>+ai-sdk@<peer>`. |
+
+The `message` is single-line so a copy-paste from a terminal lands
+cleanly in a Sentry issue title:
+
+```text
+ToolRoute violation: 'commit' called after 'search'; legal next: [review]
+(toolroute@0.1.0+ai-sdk@6.0.174)
+```
+
+## Debug
+
+```ts
+import { printRouterGraph } from 'toolroute';
+
+console.log(printRouterGraph(router));
+//=> commit -> (terminal)
+//   review -> commit
+//   search -> review
+```
+
+Plain text, sorted alphabetically, terminals as `(terminal)`. Zero
+runtime dependencies, two-minute implementation. At 7+ tools your routing
+graph lives across files; this is your single-screen view.
+
+<h2 id="non-goals">Non-goals</h2>
+
+Things explicitly **not** in v1, with rationale on the [Decisions](/decisions)
+pages:
+
+- Live Cloudflare playground — the recording + side-by-side diff is the
+  calling card.
+- Anthropic SDK adapter — Vercel AI SDK only in v1, scope-honesty.
+- Hosted observability dashboard — out of scope; would be a separate
+  product.
+- Mermaid/DOT graph renderer — `printRouterGraph` text adjacency in v1.
+
+See the [v2 deferred index](https://github.com/toolroute/toolroute/blob/main/issues/999-v2-deferred.md)
+for the canonical list.

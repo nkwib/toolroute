@@ -1,0 +1,58 @@
+<script>
+  import Callout from '$lib/components/Callout.svelte';
+</script>
+
+# Compatibility
+
+> Source: [`COMPATIBILITY.md`](https://github.com/toolroute/toolroute/blob/main/COMPATIBILITY.md)
+> at the repo root. The dated rows below are produced by the weekly CI
+> cron — see the workflow at
+> [`.github/workflows/sdk-compat.yml`](https://github.com/toolroute/toolroute/blob/main/.github/workflows/sdk-compat.yml).
+
+ToolRoute pins to a peer range of the Vercel AI SDK. The structural
+ceiling on the project's lifetime is the SDK's tool-call shape — it has
+changed twice in the last 12 months — so this file is the public, dated
+changelog of what we test against.
+
+A weekly CI cron (Mondays at 09:00 UTC) re-runs the suite against the
+latest published `ai` version. On failure the workflow opens an issue
+tagged `sdk-drift` so the break is visible.
+
+## Tested versions
+
+| SDK (`ai`) | Date tested | ToolRoute | Status | Notes |
+|------------|-------------|-----------|--------|-------|
+| 6.0.174    | 2026-05-04  | 0.1.0     | ✅ pass | Launch row. Tool-set shape: `inputSchema: FlexibleSchema<INPUT>`, `execute: ToolExecuteFunction<INPUT, OUTPUT>` (optional). |
+
+## Pinned peer range
+
+```json
+{ "peerDependencies": { "ai": ">=6.0.0 <7" } }
+```
+
+Bumping the major requires a ToolRoute major; the `routerVersion`
+diagnostic field on every `ToolRouteViolation` makes that boundary loud
+at runtime.
+
+## What "pass" means
+
+A row is `✅ pass` when:
+
+1. `pnpm typecheck` succeeds against the SDK version.
+2. `pnpm test` is green (37 tests including type tests).
+3. `pnpm tsx examples/code-review-agent/run.ts` exits non-zero with a
+   `ToolRouteViolation` containing the SDK version in `routerVersion`.
+
+A row is `⚠️ partial` when the suite passes but a known shape change
+required a documented workaround (linked in Notes).
+
+A row is `❌ fail` when the suite breaks. The `sdk-drift` issue is the
+authoritative place for the diagnosis.
+
+<Callout kind="warn" title="Drift signal in your app">
+  Every <code>ToolRouteViolation</code> carries the
+  <code>routerVersion</code> string. If a Sentry issue title shows an SDK
+  version newer than the latest row in this table, you are running ahead
+  of the tested matrix — open a <code>sdk-drift</code> issue and we'll
+  bisect.
+</Callout>
