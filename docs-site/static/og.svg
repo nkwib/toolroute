@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#0a0a0b" />
+  <rect x="40" y="40" width="1120" height="550" rx="20" fill="#131317" stroke="#2e2e35" stroke-width="2" />
+
+  <text x="100" y="160" font-family="JetBrains Mono, monospace" font-size="28" fill="#c4b5fd" letter-spacing="0.18em">TOOLROUTE · v0.1</text>
+  <text x="100" y="260" font-family="Inter, sans-serif" font-size="76" font-weight="700" fill="#f4f4f5" letter-spacing="-0.025em">Out-of-order tool calls</text>
+  <text x="100" y="340" font-family="Inter, sans-serif" font-size="76" font-weight="700" fill="#c4b5fd" letter-spacing="-0.025em">cannot reach your model.</text>
+  <text x="100" y="400" font-family="Inter, sans-serif" font-size="28" fill="#a1a1aa">Vercel AI SDK companion · typed routing graph · 50-line runtime guard</text>
+
+  <!-- Mini graph -->
+  <g transform="translate(100, 470)">
+    <circle cx="60" cy="40" r="32" fill="#131317" stroke="#c4b5fd" stroke-width="2.4" />
+    <text x="60" y="46" text-anchor="middle" font-family="JetBrains Mono" font-size="18" fill="#f4f4f5">search</text>
+    <line x1="92" y1="40" x2="208" y2="40" stroke="#c4b5fd" stroke-width="2.4" />
+
+    <circle cx="240" cy="40" r="32" fill="#131317" stroke="#c4b5fd" stroke-width="2.4" />
+    <text x="240" y="46" text-anchor="middle" font-family="JetBrains Mono" font-size="18" fill="#f4f4f5">review</text>
+    <line x1="272" y1="40" x2="388" y2="40" stroke="#c4b5fd" stroke-width="2.4" />
+
+    <circle cx="420" cy="40" r="32" fill="#131317" stroke="#c4b5fd" stroke-width="2.4" />
+    <text x="420" y="46" text-anchor="middle" font-family="JetBrains Mono" font-size="18" fill="#f4f4f5">commit</text>
+
+    <!-- illegal arc -->
+    <path d="M92 12 Q240 -42 388 12" stroke="#f87171" stroke-width="2.4" fill="none" stroke-dasharray="6 5" />
+    <line x1="220" y1="-28" x2="260" y2="12" stroke="#f87171" stroke-width="3" stroke-linecap="round" />
+    <text x="240" y="100" text-anchor="middle" font-family="JetBrains Mono" font-size="14" fill="#fca5a5">✗ search → commit (illegal)</text>
+  </g>
+
+  <text x="1100" y="570" text-anchor="end" font-family="JetBrains Mono" font-size="20" fill="#71717a">npm i toolroute · MIT</text>
+</svg>
