@@ -1,0 +1,92 @@
+name: SDK compatibility
+
+on:
+  schedule:
+    # Mondays 09:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  test-against-latest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - id: bump
+        name: Install ai@latest and capture version
+        run: |
+          pnpm add -D ai@latest --silent
+          v=$(node -p "require('./node_modules/ai/package.json').version")
+          echo "sdk_version=$v" >> "$GITHUB_OUTPUT"
+          echo "Tested against ai@$v"
+      - id: run
+        name: Run suite
+        continue-on-error: true
+        run: |
+          pnpm typecheck
+          pnpm test
+          set +e
+          pnpm tsx examples/code-review-agent/run.ts
+          fixture_status=$?
+          set -e
+          if [ "$fixture_status" -ne 1 ]; then
+            echo "Fixture expected exit 1, got $fixture_status"
+            exit 1
+          fi
+      - name: Open issue on failure
+        if: steps.run.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sdk = '${{ steps.bump.outputs.sdk_version }}';
+            const title = `sdk-drift: ai@${sdk} broke the suite`;
+            const body = [
+              `Weekly compatibility run failed against \`ai@${sdk}\`.`,
+              ``,
+              `- Workflow run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              `- Suspected cause: SDK tool-call shape change.`,
+              ``,
+              `When the cause is identified, update \`COMPATIBILITY.md\` with a `,
+              `\`❌ fail\` row pointing at this issue and either pin the peer `,
+              `range or ship a fix.`,
+            ].join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['sdk-drift'],
+            });
+      - name: Append pass row to COMPATIBILITY.md
+        if: steps.run.outcome == 'success'
+        run: |
+          set -euxo pipefail
+          sdk='${{ steps.bump.outputs.sdk_version }}'
+          today=$(date -u +%Y-%m-%d)
+          tr_pkg=$(node -p "require('./package.json').version")
+          row="| $sdk | $today | $tr_pkg | ✅ pass | Weekly cron. |"
+          # Only append if not already present (idempotent reruns).
+          if ! grep -qF "| $sdk |" COMPATIBILITY.md; then
+            printf '%s\n' "$row" >> COMPATIBILITY.md
+          fi
+      - name: Open PR with COMPATIBILITY.md update
+        if: steps.run.outcome == 'success'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: sdk-compat/auto-update
+          title: "chore(compat): record successful run against ai@${{ steps.bump.outputs.sdk_version }}"
+          commit-message: "chore(compat): record successful run against ai@${{ steps.bump.outputs.sdk_version }}"
+          body: "Weekly compatibility cron — passing run against ai@${{ steps.bump.outputs.sdk_version }}."
+          add-paths: |
+            COMPATIBILITY.md
