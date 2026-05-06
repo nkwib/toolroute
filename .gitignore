@@ -5,6 +5,9 @@ dist
 *.log
 coverage
 .vitest-cache
+.env
+.env.*
+!.env.example
 
 # docs-site (SvelteKit + Cloudflare static assets)
 docs-site/node_modules
