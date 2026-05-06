@@ -88,8 +88,8 @@ describe('checkTransition', () => {
 });
 
 describe('legalNextFor', () => {
-  it('with prev=null returns entry tools sorted (those with non-empty nextAllowed)', () => {
-    expect(legalNextFor(adjacency, null)).toEqual(['review', 'search']);
+  it('with prev=null returns entry tools in insertion order (those with non-empty nextAllowed)', () => {
+    expect(legalNextFor(adjacency, null)).toEqual(['search', 'review']);
   });
 
   it('with prev=name returns its nextAllowed', () => {

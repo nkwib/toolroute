@@ -18,8 +18,7 @@ export function legalNextFor(
   if (prev === null) {
     return Object.entries(adjacency)
       .filter(([, next]) => next.length > 0)
-      .map(([name]) => name)
-      .sort();
+      .map(([name]) => name);
   }
   return adjacency[prev] ?? [];
 }
