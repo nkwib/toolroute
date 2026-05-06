@@ -39,16 +39,28 @@ export function createRouterFromTools<
 
   const adjacency: Record<string, readonly string[]> = {};
   for (const t of tools) {
+    const seen = new Set<string>();
+    const deduped: string[] = [];
     for (const n of t.nextAllowed) {
       if (!names.has(n)) {
         throw new Error(
           `[ToolRoute] Tool '${t.name}' references unknown tool '${n}' in nextAllowed. Legal: [${[...names].join(', ')}]`,
         );
       }
+      if (seen.has(n)) continue;
+      seen.add(n);
+      deduped.push(n);
     }
-    adjacency[t.name] = t.nextAllowed;
+    adjacency[t.name] = Object.freeze(deduped);
   }
   Object.freeze(adjacency);
+
+  const hasEntry = tools.some((t) => adjacency[t.name]!.length > 0);
+  if (!hasEntry) {
+    throw new Error(
+      '[ToolRoute] Router has no entry tools: every tool has an empty `nextAllowed`, so no call can ever be legal. At least one tool must list a successor.',
+    );
+  }
 
   const routerVersion = buildRouterVersion({ sdkVersion: options.sdkVersion });
   const strictMode = options.strictMode ?? false;
@@ -72,7 +84,7 @@ export function createRouterFromTools<
           warn,
         });
         state.prev = def.name;
-        return await def.execute(input as never, ctx);
+        return await def.execute(input as Parameters<typeof def.execute>[0], ctx);
       },
     };
   }
