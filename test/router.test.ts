@@ -1,6 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { z } from 'zod';
-import { defineTool, createRouterFromTools, ToolRouteViolation } from '../src/index.js';
+import {
+  defineTool,
+  createRouterFromTools,
+  legalNextFor,
+  nextTools,
+  ToolRouteViolation,
+} from '../src/index.js';
 import { codeReviewTools } from '../examples/code-review-agent/tools.js';
 
 describe('createRouterFromTools', () => {
@@ -97,6 +103,78 @@ describe('createRouterFromTools', () => {
     await expect(
       tools['search']!.execute({ query: 'q2' }, { toolCallId: 't3' }),
     ).resolves.toBeDefined();
+  });
+
+  it('throws when no tool has any nextAllowed (router has no entry tools)', () => {
+    const dead1 = defineTool({
+      name: 'dead1',
+      inputSchema: z.object({}),
+      nextAllowed: [] as const,
+      execute: async () => undefined,
+    });
+    const dead2 = defineTool({
+      name: 'dead2',
+      inputSchema: z.object({}),
+      nextAllowed: [] as const,
+      execute: async () => undefined,
+    });
+    expect(() => createRouterFromTools([dead1, dead2])).toThrow(/no entry tools/);
+  });
+
+  it('de-duplicates nextAllowed at construction', () => {
+    const a = defineTool({
+      name: 'a',
+      inputSchema: z.object({}),
+      nextAllowed: ['b', 'b', 'c', 'b'] as const,
+      execute: async () => undefined,
+    });
+    const b = defineTool({
+      name: 'b',
+      inputSchema: z.object({}),
+      nextAllowed: ['c'] as const,
+      execute: async () => undefined,
+    });
+    const c = defineTool({
+      name: 'c',
+      inputSchema: z.object({}),
+      nextAllowed: [] as const,
+      execute: async () => undefined,
+    });
+    const r = createRouterFromTools([a, b, c]);
+    expect(r.adjacency['a']).toEqual(['b', 'c']);
+  });
+
+  it('legalNextFor(null) and nextTools(router, null) agree on entry-tool order (insertion order)', () => {
+    // Multiple entry tools defined in non-alphabetical insertion order.
+    const zeta = defineTool({
+      name: 'zeta',
+      inputSchema: z.object({}),
+      nextAllowed: ['mid'] as const,
+      execute: async () => undefined,
+    });
+    const alpha = defineTool({
+      name: 'alpha',
+      inputSchema: z.object({}),
+      nextAllowed: ['mid'] as const,
+      execute: async () => undefined,
+    });
+    const mid = defineTool({
+      name: 'mid',
+      inputSchema: z.object({}),
+      nextAllowed: ['end'] as const,
+      execute: async () => undefined,
+    });
+    const end = defineTool({
+      name: 'end',
+      inputSchema: z.object({}),
+      nextAllowed: [] as const,
+      execute: async () => undefined,
+    });
+    const r = createRouterFromTools([zeta, alpha, mid, end]);
+    const fromGuard = legalNextFor(r.adjacency, null);
+    const fromNarrow = Object.keys(nextTools(r, null));
+    expect(fromGuard).toEqual(['zeta', 'alpha', 'mid']);
+    expect(fromNarrow).toEqual(fromGuard);
   });
 
   it('warn mode emits console.warn instead of throwing', async () => {
