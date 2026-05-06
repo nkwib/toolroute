@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.0 — 2026-05-06
+
+### Changed
+
+- `createRouterFromTools` now throws at construction when no tool is reachable as
+  an entry point (every tool listed under another tool's `nextAllowed`). The
+  previous behaviour silently produced a router that would throw on every call.
+- Adjacency entries with duplicate names in `nextAllowed` are now de-duplicated
+  (preserving first-seen order). `printRouterGraph` no longer emits duplicates.
+- `legalNextFor(null)` now returns entry tools in insertion order, matching
+  `nextTools(router, null)`.
+
+### Fixed
+
+- Replaced `as never` cast in `router.ts` with a properly typed cast.
+- `.gitignore` now ignores `.env` / `.env.*` (with `!.env.example`).
+
 ## 0.1.0 — 2026-05-04
 
 Initial public release. Treated as a pre-1.0 calling card; a 1.0.0 cut
