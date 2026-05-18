@@ -48,3 +48,4 @@ authoritative place for the diagnosis.
 Bumping the major requires a ToolRoute major; the
 `routerVersion` diagnostic field on every `ToolRouteViolation` makes
 that boundary loud at runtime.
+| 6.0.184 | 2026-05-18 | 0.2.0 | ✅ pass | Weekly cron. |
