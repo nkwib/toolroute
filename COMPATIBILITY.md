@@ -49,3 +49,4 @@ Bumping the major requires a ToolRoute major; the
 `routerVersion` diagnostic field on every `ToolRouteViolation` makes
 that boundary loud at runtime.
 | 6.0.193 | 2026-06-01 | 0.2.0 | ✅ pass | Weekly cron. |
+| 6.0.197 | 2026-06-08 | 0.2.0 | ✅ pass | Weekly cron. |
