@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+Audit hardening pass. No public API changes.
+
+### Fixed
+
+- `TOOLROUTE_VERSION` was still `'0.1.0'` while the package shipped as
+  `0.2.0`, so every runtime `routerVersion` diagnostic mislabelled the
+  version. Bumped to `'0.2.0'` and added a unit test that asserts the
+  const matches `package.json` so a release can no longer drift it.
+- `tsup` no longer strips the `node:` import prefix (`removeNodeProtocol: false`).
+  The previous build rewrote `node:module` to bare `module`, which breaks
+  Cloudflare Workers `nodejs_compat`.
+- `package.json#repository.url` now uses the canonical
+  `git+https://github.com/nkwib/toolroute.git` form.
+
+### Changed
+
+- CI now runs `pnpm smoke` (the dist-tarball consumer test) after build.
+- Documented two known limitations in the README: a router instance holds
+  one `state.prev` (use one router per concurrent run, or `reset()` between
+  sequential runs), and entry tools are those with a non-empty
+  `nextAllowed` (a terminal tool can never be the first call, by design).
+- Docs site: version badges are now generated from the root `package.json`,
+  the changelog and compatibility tables carry the `0.2.0` rows, and stale
+  `toolroute@0.1.0` example output was refreshed to `0.2.0`.
+
 ## 0.2.0 — 2026-05-06
 
 ### Changed
