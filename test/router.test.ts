@@ -6,13 +6,14 @@ import {
   legalNextFor,
   nextTools,
   ToolRouteViolation,
+  TOOLROUTE_VERSION,
 } from '../src/index.js';
 import { codeReviewTools } from '../examples/code-review-agent/tools.js';
 
 describe('createRouterFromTools', () => {
   it('exposes routerVersion built from package + sdk version', () => {
     const r = createRouterFromTools(codeReviewTools, { sdkVersion: '6.0.0' });
-    expect(r.routerVersion).toBe('toolroute@0.1.0+ai-sdk@6.0.0');
+    expect(r.routerVersion).toBe(`toolroute@${TOOLROUTE_VERSION}+ai-sdk@6.0.0`);
   });
 
   it('throws on unknown nextAllowed reference at construction', () => {
