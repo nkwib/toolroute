@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## 0.2.1
 
 Audit hardening pass. No public API changes.
 
@@ -10,8 +10,8 @@ Audit hardening pass. No public API changes.
 
 - `TOOLROUTE_VERSION` was still `'0.1.0'` while the package shipped as
   `0.2.0`, so every runtime `routerVersion` diagnostic mislabelled the
-  version. Bumped to `'0.2.0'` and added a unit test that asserts the
-  const matches `package.json` so a release can no longer drift it.
+  version. It is now kept in lockstep with `package.json` (a unit test
+  asserts the const matches) so a release can no longer drift it.
 - `tsup` no longer strips the `node:` import prefix (`removeNodeProtocol: false`).
   The previous build rewrote `node:module` to bare `module`, which breaks
   Cloudflare Workers `nodejs_compat`.

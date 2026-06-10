@@ -1,6 +1,6 @@
 {
   "name": "toolroute",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Vercel AI SDK companion that turns tool definitions into a typed routing graph.",
   "license": "MIT",
   "type": "module",
@@ -57,7 +57,9 @@
     "zod": ">=3.23.0 <5"
   },
   "peerDependenciesMeta": {
-    "zod": { "optional": true }
+    "zod": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
