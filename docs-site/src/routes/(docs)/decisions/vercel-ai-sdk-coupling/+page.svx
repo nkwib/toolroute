@@ -20,7 +20,7 @@ risk:
    the entire suite against `ai@latest` every Monday at 09:00 UTC.
    Failures auto-open an issue tagged `sdk-drift`.
 3. **`routerVersion` diagnostic field** on every `ToolRouteViolation`
-   (`toolroute@0.1.0+ai-sdk@6.0.174`). A Sentry triage paste tells you
+   (`toolroute@0.2.0+ai-sdk@6.0.174`). A Sentry triage paste tells you
    which SDK was on the box.
 
 ## Why

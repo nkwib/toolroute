@@ -28,7 +28,7 @@ into the table by hand and merge as a docs PR.
 A row is `✅ pass` when:
 
 1. `pnpm typecheck` succeeds against the SDK version.
-2. `pnpm test` is green (37 tests including type tests).
+2. `pnpm test` is green (40 tests including type tests).
 3. `pnpm tsx examples/code-review-agent/run.ts` exits non-zero with a
    `ToolRouteViolation` containing the SDK version in `routerVersion`.
 

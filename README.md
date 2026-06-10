@@ -29,7 +29,7 @@ before `review`):
    not exist in type '{ review: SDKToolFor<...> }'`.
 2. **Runtime rejection.** The same code, run anyway, throws
    `ToolRouteViolation: 'commit' called after 'search'; legal next:
-   [review] (toolroute@0.1.0+ai-sdk@6.0.x)`.
+   [review] (toolroute@0.2.0+ai-sdk@6.0.x)`.
 
 Both layers describe the **same** rejection because both read the same
 `nextAllowed` array — there is no second source of truth to drift.
@@ -234,6 +234,23 @@ await withCassette('checkout-flow.json', async () => {
 The matcher reads the router's public `adjacency` / `routerVersion`
 fields structurally, so any ToolRoute version works and neither package
 depends on the other.
+
+## Known limitations
+
+Two behaviours are worth knowing before you wire ToolRoute into a fleet
+of agents:
+
+- **One router per concurrent run.** A router instance tracks a single
+  `state.prev` pointer. If several agent runs share the same
+  `router.tools` at the same time, their transitions cross-contaminate
+  the guard and you will get spurious (or missed) violations. Build one
+  router per run, or call `router.reset()` between *sequential* runs that
+  reuse the same instance.
+- **Entry tools must have successors.** An entry tool is defined as one
+  with a non-empty `nextAllowed`. A terminal tool (empty `nextAllowed`)
+  can therefore never be the first call in a run — `nextTools(router, null)`
+  excludes it by design. If a tool should be legal as the first step,
+  give it at least one successor.
 
 ## Limits and v2
 

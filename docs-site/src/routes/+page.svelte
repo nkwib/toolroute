@@ -1,4 +1,6 @@
 <script>
+  import version from '$lib/generated/version.js';
+
   // Deep-link to the TS Playground with the canonical narrowing demo.
   const PLAYGROUND_URL =
     'https://www.typescriptlang.org/play/?#code/JYWwDg9gTgLgBAJQKYEMDG8BmUIjgcilQ3wG4AoUSWRFAOwzkQEEQEMxoBVAEz5gAvD5UBBPnHRwwJOABE4AYxgBnYJGABXTPAA2cMAFkA9DQDmuiCFDAYAGQAUAQQDeAUgC+ASkPGzlqzas2GEKHyAGSCEJTBxyAAA';
@@ -17,7 +19,7 @@
     <div class="hero-copy">
       <span class="badge">
         <span class="dot" aria-hidden="true"></span>
-        v0.1 · MIT · ~340 LOC · 37 tests
+        v{version} · MIT · ~340 LOC · 40 tests
       </span>
       <h1>
         Out-of-order tool calls<br />
@@ -60,7 +62,7 @@
 
 <span class="cmt">// Model picks 'commit' after 'search' (illegal):</span>
 <span class="err">[runner] BLOCKED: ToolRoute violation: 'commit' called after 'search';
-         legal next: [review] (toolroute@0.1.0+ai-sdk@6.0.174)</span></code></pre>
+         legal next: [review] (toolroute@0.2.0+ai-sdk@6.0.174)</span></code></pre>
     </aside>
   </div>
 </section>
@@ -146,7 +148,7 @@
       </div>
       <h3>Calling card, not platform</h3>
       <p>
-        No paid tier, no hosted dashboard, no playground in v1. ~340 LOC, 37 tests, weekly CI
+        No paid tier, no hosted dashboard, no playground in v1. ~340 LOC, 40 tests, weekly CI
         cron pinned to <code>ai@latest</code>. Zero distraction surface.
       </p>
     </div>
@@ -176,7 +178,7 @@
 
 <span class="cmt">// At runtime: every ToolRouteViolation carries the version</span>
 <span class="cmt">// you compiled against — paste into Sentry as-is.</span>
-<span class="prop">routerVersion</span>: <span class="str">"toolroute@0.1.0+ai-sdk@6.0.174"</span></code></pre>
+<span class="prop">routerVersion</span>: <span class="str">"toolroute@0.2.0+ai-sdk@6.0.174"</span></code></pre>
   </div>
 </section>
 

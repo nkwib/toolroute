@@ -79,7 +79,7 @@ array is empty, or if there are duplicate names.
 const router = createRouterFromTools([search, review, commit] as const, {
   strictMode: true,
 });
-router.routerVersion // 'toolroute@0.1.0+ai-sdk@6.0.174'
+router.routerVersion // 'toolroute@0.2.0+ai-sdk@6.0.174'
 router.adjacency     // { search: ['review'], review: ['commit'], commit: [] }
 ```
 
@@ -299,7 +299,7 @@ level. With `Prev = null`, the legal set is every tool whose
   id="TOOLROUTE_VERSION"
   name="TOOLROUTE_VERSION"
   kind="const"
-  signature={`const TOOLROUTE_VERSION: '0.1.0';`}
+  signature={`const TOOLROUTE_VERSION: '0.2.0';`}
 />
 
 <ApiSignature
