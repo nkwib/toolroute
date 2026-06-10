@@ -47,7 +47,7 @@
   "homepage": "https://github.com/nkwib/toolroute#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nkwib/toolroute.git"
+    "url": "git+https://github.com/nkwib/toolroute.git"
   },
   "bugs": {
     "url": "https://github.com/nkwib/toolroute/issues"
