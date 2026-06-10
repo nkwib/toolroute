@@ -11,7 +11,7 @@
 [runner] tool-call: <span class="fn">search</span>
 [runner] tool-call: <span class="fn">commit</span>
 <span class="err">[runner] BLOCKED: ToolRoute violation: 'commit' called after 'search';
-         legal next: [review] (toolroute@0.1.0+ai-sdk@6.0.174)</span>`;
+         legal next: [review] (toolroute@0.2.0+ai-sdk@6.0.174)</span>`;
 </script>
 
 # No playground in v1
@@ -21,7 +21,7 @@
 We **cut** the live Cloudflare playground from v1. All four personas in
 round 2 independently agreed. A static side-by-side raw-SDK vs ToolRoute
 diff plus the captured rejection below — both committed to the repo —
-are the calling card instead.toolroute@0.1.0
+are the calling card instead.
 
 <DemoTerminal filename="what replaces the playground" body={replacementBody} />
 
