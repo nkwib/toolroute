@@ -77,7 +77,7 @@ await streamText({
 
 // If the model picks 'commit' after 'search', the wrapped execute throws:
 // ToolRouteViolation: 'commit' called after 'search'; legal next: [review]
-//                     (toolroute@0.1.0+ai-sdk@6.0.174)`;
+//                     (toolroute@0.2.0+ai-sdk@6.0.174)`;
 
 const diffCode = `- const search = tool({ description, inputSchema, execute });
 + const search = defineTool({

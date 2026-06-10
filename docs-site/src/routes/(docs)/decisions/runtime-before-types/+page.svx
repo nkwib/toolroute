@@ -3,7 +3,7 @@
   import Callout from '$lib/components/Callout.svelte';
 
   const spikeRunBody = `<span class="prompt">$</span> pnpm tsx examples/code-review-agent/run.ts
-[runner] router=<span class="str">toolroute@0.1.0+ai-sdk@6.0.174</span>
+[runner] router=<span class="str">toolroute@0.2.0+ai-sdk@6.0.174</span>
 [runner] strictMode=<span class="kw">true</span>
 [runner] planned calls: search -&gt; commit
 
@@ -11,7 +11,7 @@
 [runner] tool-result: <span class="fn">search</span> -&gt; &lbrace; hits: [...], query: <span class="str">"login"</span> &rbrace;
 [runner] tool-call: <span class="fn">commit</span>
 <span class="err">[runner] BLOCKED: ToolRoute violation: 'commit' called after 'search';
-         legal next: [review] (toolroute@0.1.0+ai-sdk@6.0.174)</span>
+         legal next: [review] (toolroute@0.2.0+ai-sdk@6.0.174)</span>
 <span class="prompt">$</span> echo <span class="str">"exit=$?"</span>
 exit=<span class="num">1</span>`;
 </script>
