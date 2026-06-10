@@ -68,7 +68,7 @@ jobs:
               body,
               labels: ['sdk-drift'],
             });
-      - name: Append pass row to COMPATIBILITY.md
+      - name: Insert pass row into the COMPATIBILITY.md table
         if: steps.run.outcome == 'success'
         run: |
           set -euxo pipefail
@@ -76,10 +76,19 @@ jobs:
           today=$(date -u +%Y-%m-%d)
           tr_pkg=$(node -p "require('./package.json').version")
           row="| $sdk | $today | $tr_pkg | ✅ pass | Weekly cron. |"
-          # Only append if not already present (idempotent reruns).
-          if ! grep -qF "| $sdk |" COMPATIBILITY.md; then
-            printf '%s\n' "$row" >> COMPATIBILITY.md
+          # Idempotent reruns: skip if this SDK version already has a row.
+          if grep -qF "| $sdk |" COMPATIBILITY.md; then
+            exit 0
           fi
+          # Insert at the end of the "Tested versions" table — a plain append
+          # lands after the prose sections that follow the table.
+          awk -v row="$row" '
+            /^\| SDK \(/ { intable=1 }
+            intable && !added && !/^\|/ { print row; added=1 }
+            { print }
+            END { if (intable && !added) print row }
+          ' COMPATIBILITY.md > COMPATIBILITY.md.tmp
+          mv COMPATIBILITY.md.tmp COMPATIBILITY.md
       - name: Open PR with COMPATIBILITY.md update
         if: steps.run.outcome == 'success'
         uses: peter-evans/create-pull-request@v6
