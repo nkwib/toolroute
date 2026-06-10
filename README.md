@@ -217,11 +217,11 @@ cleanly in an issue title.
 record/replay middleware for the same SDK. Guard trajectories in
 production with ToolRoute, replay model calls offline in CI with
 tapedeck, and assert the recorded trajectory against your router with
-the `toFollowRoute()` matcher from `tapedeck/vitest`:
+the `toFollowRoute()` matcher from `@nkwib/tapedeck/vitest`:
 
 ```typescript
 import { expect } from 'vitest';
-import { toFollowRoute, withCassette } from 'tapedeck/vitest';
+import { toFollowRoute, withCassette } from '@nkwib/tapedeck/vitest';
 
 expect.extend({ toFollowRoute });
 
