@@ -14,6 +14,7 @@ tagged `sdk-drift` so the break is visible.
 
 | SDK (`ai`) | Date tested | ToolRoute | Status | Notes |
 |------------|-------------|-----------|--------|-------|
+| 6.0.193 | 2026-06-01 | 0.2.0 | ✅ pass | Weekly cron. |
 | 6.0.174    | 2026-05-04  | 0.1.0     | ✅ pass | Launch row. Tool-set shape: `inputSchema: FlexibleSchema<INPUT>`, `execute: ToolExecuteFunction<INPUT, OUTPUT>` (optional). |
 
 ## How to add a row
@@ -48,4 +49,3 @@ authoritative place for the diagnosis.
 Bumping the major requires a ToolRoute major; the
 `routerVersion` diagnostic field on every `ToolRouteViolation` makes
 that boundary loud at runtime.
-| 6.0.193 | 2026-06-01 | 0.2.0 | ✅ pass | Weekly cron. |

@@ -211,6 +211,30 @@ version we test against — a weekly CI cron re-runs the suite against
 The `message` is single-line so a copy-paste from a terminal lands
 cleanly in an issue title.
 
+## Pairs well with tapedeck
+
+[`tapedeck`](https://github.com/nkwib/tapedeck) is the sibling package:
+record/replay middleware for the same SDK. Guard trajectories in
+production with ToolRoute, replay model calls offline in CI with
+tapedeck, and assert the recorded trajectory against your router with
+the `toFollowRoute()` matcher from `tapedeck/vitest`:
+
+```typescript
+import { expect } from 'vitest';
+import { toFollowRoute, withCassette } from 'tapedeck/vitest';
+
+expect.extend({ toFollowRoute });
+
+await withCassette('checkout-flow.json', async () => {
+  const result = await runAgent({ prompt: 'buy a t-shirt' });
+  expect(result.steps).toFollowRoute(router);
+});
+```
+
+The matcher reads the router's public `adjacency` / `routerVersion`
+fields structurally, so any ToolRoute version works and neither package
+depends on the other.
+
 ## Limits and v2
 
 Things explicitly **not** in v1 — see
