@@ -14,3 +14,8 @@ docs-site/node_modules
 docs-site/.svelte-kit
 docs-site/build
 docs-site/src/lib/generated
+
+# Internal planning docs — not for the public repo
+context/
+issues/
+KICKOFF.md
