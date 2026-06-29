@@ -16,6 +16,7 @@ tagged `sdk-drift` so the break is visible.
 |------------|-------------|-----------|--------|-------|
 | 6.0.193 | 2026-06-01 | 0.2.0 | ✅ pass | Weekly cron. |
 | 6.0.174    | 2026-05-04  | 0.1.0     | ✅ pass | Launch row. Tool-set shape: `inputSchema: FlexibleSchema<INPUT>`, `execute: ToolExecuteFunction<INPUT, OUTPUT>` (optional). |
+| 7.0.4 | 2026-06-29 | 0.2.1 | ✅ pass | Weekly cron. |
 
 ## How to add a row
 
