@@ -14,6 +14,7 @@ tagged `sdk-drift` so the break is visible.
 
 | SDK (`ai`) | Date tested | ToolRoute | Status | Notes |
 |------------|-------------|-----------|--------|-------|
+| 7.0.107 | 2026-09-19 | 0.2.2 | ✅ pass | `LanguageModelV3` requires the raw model stream's `finish` part to carry `finishReason: { unified, raw }` instead of a bare string. Router/guard code (`src/guard.ts`, `src/router.ts`, `src/narrow.ts`) is unaffected; only the hand-rolled mock in `examples/code-review-agent/run.ts` needed the new shape. |
 | 6.0.193 | 2026-06-01 | 0.2.0 | ✅ pass | Weekly cron. |
 | 6.0.174    | 2026-05-04  | 0.1.0     | ✅ pass | Launch row. Tool-set shape: `inputSchema: FlexibleSchema<INPUT>`, `execute: ToolExecuteFunction<INPUT, OUTPUT>` (optional). |
 
@@ -43,7 +44,7 @@ authoritative place for the diagnosis.
 `package.json#peerDependencies.ai`:
 
 ```json
-{ "ai": ">=6.0.0 <7" }
+{ "ai": ">=6.0.0 <8" }
 ```
 
 Bumping the major requires a ToolRoute major; the

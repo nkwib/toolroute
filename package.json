@@ -1,6 +1,6 @@
 {
   "name": "toolroute",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Vercel AI SDK companion that turns tool definitions into a typed routing graph.",
   "license": "MIT",
   "type": "module",
@@ -55,7 +55,7 @@
     "url": "https://github.com/nkwib/toolroute/issues"
   },
   "peerDependencies": {
-    "ai": ">=6.0.0 <7",
+    "ai": ">=6.0.0 <8",
     "zod": ">=3.23.0 <5"
   },
   "peerDependenciesMeta": {

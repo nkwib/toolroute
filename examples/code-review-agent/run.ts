@@ -26,7 +26,7 @@ type StreamPart =
     }
   | {
       type: 'finish';
-      finishReason: string;
+      finishReason: { unified: 'stop' | 'tool-calls'; raw: string };
       usage: { inputTokens: number; outputTokens: number; totalTokens: number };
     };
 
@@ -44,7 +44,7 @@ function streamPartsForToolCall(
     },
     {
       type: 'finish',
-      finishReason: 'tool-calls',
+      finishReason: { unified: 'tool-calls', raw: 'tool_calls' },
       usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
     },
   ];
@@ -72,7 +72,7 @@ async function main(): Promise<void> {
             { type: 'stream-start', warnings: [] },
             {
               type: 'finish',
-              finishReason: 'stop',
+              finishReason: { unified: 'stop', raw: 'stop' },
               usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
             },
           ],
