@@ -37,10 +37,12 @@
   },
   "keywords": [
     "vercel-ai-sdk",
+    "ai-sdk",
     "ai",
     "agents",
     "typescript",
     "tool-calling",
+    "tool-ordering",
     "state-machine",
     "type-safety"
   ],
