@@ -2,6 +2,8 @@
 
 > Vercel AI SDK companion that turns tool definitions into a typed routing graph.
 
+Not affiliated with toolroute.io or the `@toolroute/*` packages; this package provides typed, enforced tool-call ordering for the Vercel AI SDK.
+
 **[📚 Docs site](https://toolroute.pages.dev/)** · **[Quickstart](https://toolroute.pages.dev/docs#quickstart)** · **[API reference](https://toolroute.pages.dev/api)** · **[Before / after](https://toolroute.pages.dev/before-after)** · **[Decisions](https://toolroute.pages.dev/decisions)**
 
 Production agents fail most often at **tool ordering** — the model calls
