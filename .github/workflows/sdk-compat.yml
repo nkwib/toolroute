@@ -32,7 +32,6 @@ jobs:
           echo "Tested against ai@$v"
       - id: run
         name: Run suite
-        continue-on-error: true
         run: |
           pnpm typecheck
           pnpm test
@@ -45,7 +44,7 @@ jobs:
             exit 1
           fi
       - name: Open issue on failure
-        if: steps.run.outcome == 'failure'
+        if: failure()
         uses: actions/github-script@v7
         with:
           script: |

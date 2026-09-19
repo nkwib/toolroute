@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.2
+
+### Fixed
+
+- Widened `peerDependencies.ai` to `>=6.0.0 <8`. Verified the full suite
+  against both the locked `ai@6.0.174` and `ai@7.0.107`: `LanguageModelV3`
+  requires the raw stream's `finish` part to carry
+  `finishReason: { unified, raw }` instead of a bare string. The router and
+  guard (`src/guard.ts`, `src/router.ts`, `src/narrow.ts`) never touch that
+  shape and needed no change; only the hand-rolled mock in
+  `examples/code-review-agent/run.ts` did. Closes #6, #7, #8, #9.
+- `.github/workflows/sdk-compat.yml`: the weekly test step had
+  `continue-on-error: true`, so every run since 2026-08-24 filed an
+  `sdk-drift` issue while still reporting green. The test step now fails
+  the job for real; the issue-filing step runs on `if: failure()`.
+
 ## 0.2.1
 
 Audit hardening pass. No public API changes.
