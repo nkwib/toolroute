@@ -265,6 +265,14 @@ roadmap:
 - Mermaid/DOT routing-graph renderer.
 - Hosted observability dashboard.
 
+## Releasing
+
+1. Bump the version in package.json and add a CHANGELOG.md entry (where the repo keeps one).
+2. Tag and push: git tag vX.Y.Z && git push origin vX.Y.Z.
+3. .github/workflows/release.yml builds, tests, and runs npm publish --provenance for that tag. The tag must equal "v" plus the package.json version, otherwise the job stops before publishing.
+
+One-time setup on npmjs.com (package Settings, Trusted Publisher): provider GitHub Actions, organization or user nkwib, repository toolroute, workflow filename release.yml, environment left blank. Under Allowed actions tick "Allow npm publish": a new trusted publisher only allows "npm stage publish" by default, and the workflow's direct npm publish then fails with "403 OIDC permission denied for this action".
+
 ## License
 
 MIT.
