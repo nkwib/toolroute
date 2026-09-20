@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## 0.3.0
+
 ### Changed
 
 - `createRouterFromTools` now throws `[ToolRoute] Tool '<name>' lists '<successor>'
