@@ -300,7 +300,7 @@ level. With `Prev = null`, the legal set is every tool whose
   id="TOOLROUTE_VERSION"
   name="TOOLROUTE_VERSION"
   kind="const"
-  signature={`const TOOLROUTE_VERSION: '0.2.0';`}
+  signature={`const TOOLROUTE_VERSION: '0.3.0';`}
 />
 
 <ApiSignature
