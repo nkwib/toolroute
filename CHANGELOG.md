@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- `createRouterFromTools` now throws `[ToolRoute] Tool '<name>' lists '<successor>'
+  more than once in nextAllowed.` instead of silently deduping. A duplicate
+  successor was the one malformed input that was accepted at construction
+  while every other bad shape (unknown tool, duplicate tool name) already
+  threw; this is a behavior change for any config that relied on the old
+  silent dedup.
+- `nextTools(router, null)` now calls `legalNextFor(router.adjacency, null)`
+  instead of recomputing the entry-tool set with a second copy of the same
+  filter. No observable output changed; this removes the risk of the two
+  functions drifting apart.
+
 ## 0.2.2
 
 ### Fixed

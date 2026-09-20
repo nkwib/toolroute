@@ -40,18 +40,20 @@ export function createRouterFromTools<
   const adjacency: Record<string, readonly string[]> = {};
   for (const t of tools) {
     const seen = new Set<string>();
-    const deduped: string[] = [];
     for (const n of t.nextAllowed) {
       if (!names.has(n)) {
         throw new Error(
           `[ToolRoute] Tool '${t.name}' references unknown tool '${n}' in nextAllowed. Legal: [${[...names].join(', ')}]`,
         );
       }
-      if (seen.has(n)) continue;
+      if (seen.has(n)) {
+        throw new Error(
+          `[ToolRoute] Tool '${t.name}' lists '${n}' more than once in nextAllowed.`,
+        );
+      }
       seen.add(n);
-      deduped.push(n);
     }
-    adjacency[t.name] = Object.freeze(deduped);
+    adjacency[t.name] = Object.freeze([...t.nextAllowed]);
   }
   Object.freeze(adjacency);
 

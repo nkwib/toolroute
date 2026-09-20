@@ -72,7 +72,8 @@ Build a router from a const tuple of `defineTool` outputs. Validates that
 every `nextAllowed` reference exists, derives the name set, builds the
 adjacency map, and returns the wrapped `tools` record.
 
-**Throws** if a `nextAllowed` entry references an unknown tool, if the
+**Throws** if a `nextAllowed` entry references an unknown tool, if a
+`nextAllowed` entry is listed more than once for the same tool, if the
 array is empty, or if there are duplicate names.
 
 ```ts
