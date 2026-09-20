@@ -122,7 +122,7 @@ describe('createRouterFromTools', () => {
     expect(() => createRouterFromTools([dead1, dead2])).toThrow(/no entry tools/);
   });
 
-  it('de-duplicates nextAllowed at construction', () => {
+  it('throws on duplicate nextAllowed entries at construction', () => {
     const a = defineTool({
       name: 'a',
       inputSchema: z.object({}),
@@ -141,8 +141,9 @@ describe('createRouterFromTools', () => {
       nextAllowed: [] as const,
       execute: async () => undefined,
     });
-    const r = createRouterFromTools([a, b, c]);
-    expect(r.adjacency['a']).toEqual(['b', 'c']);
+    expect(() => createRouterFromTools([a, b, c])).toThrow(
+      /Tool 'a' lists 'b' more than once in nextAllowed/,
+    );
   });
 
   it('legalNextFor(null) and nextTools(router, null) agree on entry-tool order (insertion order)', () => {
@@ -176,6 +177,15 @@ describe('createRouterFromTools', () => {
     const fromNarrow = Object.keys(nextTools(r, null));
     expect(fromGuard).toEqual(['zeta', 'alpha', 'mid']);
     expect(fromNarrow).toEqual(fromGuard);
+  });
+
+  it('nextTools computes the entry-tool set through legalNextFor, not a second copy', async () => {
+    const guard = await import('../src/guard.js');
+    const spy = vi.spyOn(guard, 'legalNextFor');
+    const r = createRouterFromTools(codeReviewTools, { sdkVersion: '6.0.0' });
+    nextTools(r, null);
+    expect(spy).toHaveBeenCalledWith(r.adjacency, null);
+    spy.mockRestore();
   });
 
   it('warn mode emits console.warn instead of throwing', async () => {

@@ -1,5 +1,6 @@
 import type { ToolRouteDef, SDKToolFor } from './define-tool.js';
 import type { Router } from './router.js';
+import { legalNextFor } from './guard.js';
 
 export type ToolByName<
   Tools extends readonly ToolRouteDef[],
@@ -42,10 +43,7 @@ export function nextTools<R, Prev extends string | null>(
     adjacency: Record<string, readonly string[]>;
     tools: Record<string, unknown>;
   };
-  const legal =
-    prev === null
-      ? Object.entries(r.adjacency).filter(([, n]) => n.length > 0).map(([n]) => n)
-      : (r.adjacency[prev as string] ?? []);
+  const legal = legalNextFor(r.adjacency, prev as string | null);
   const out: Record<string, unknown> = {};
   for (const name of legal) {
     const sdk = r.tools[name];
