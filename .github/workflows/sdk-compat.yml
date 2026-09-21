@@ -90,7 +90,7 @@ jobs:
           mv COMPATIBILITY.md.tmp COMPATIBILITY.md
       - name: Open PR with COMPATIBILITY.md update
         if: steps.run.outcome == 'success'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: sdk-compat/auto-update
           title: "chore(compat): record successful run against ai@${{ steps.bump.outputs.sdk_version }}"
