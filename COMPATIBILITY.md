@@ -17,6 +17,7 @@ tagged `sdk-drift` so the break is visible.
 | 7.0.107 | 2026-09-19 | 0.2.2 | ✅ pass | `LanguageModelV3` requires the raw model stream's `finish` part to carry `finishReason: { unified, raw }` instead of a bare string. Router/guard code (`src/guard.ts`, `src/router.ts`, `src/narrow.ts`) is unaffected; only the hand-rolled mock in `examples/code-review-agent/run.ts` needed the new shape. |
 | 6.0.193 | 2026-06-01 | 0.2.0 | ✅ pass | Weekly cron. |
 | 6.0.174    | 2026-05-04  | 0.1.0     | ✅ pass | Launch row. Tool-set shape: `inputSchema: FlexibleSchema<INPUT>`, `execute: ToolExecuteFunction<INPUT, OUTPUT>` (optional). |
+| 7.0.119 | 2026-09-28 | 0.3.0 | ✅ pass | Weekly cron. |
 
 ## How to add a row
 
