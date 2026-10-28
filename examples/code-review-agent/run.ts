@@ -8,7 +8,7 @@
  *
  * No network calls. CI runs this offline.
  */
-import { streamText, stepCountIs, simulateReadableStream } from 'ai';
+import { streamText, isStepCount, simulateReadableStream } from 'ai';
 import { MockLanguageModelV3 } from 'ai/test';
 import {
   createRouterFromTools,
@@ -98,11 +98,11 @@ async function main(): Promise<void> {
     model,
     tools: router.tools,
     prompt: 'Find and ship the fix.',
-    stopWhen: stepCountIs(3),
+    stopWhen: isStepCount(3),
   });
 
   try {
-    for await (const part of result.fullStream) {
+    for await (const part of result.stream) {
       if (part.type === 'tool-call') {
         console.log(`[runner] tool-call: ${part.toolName}`);
       } else if (part.type === 'tool-result') {

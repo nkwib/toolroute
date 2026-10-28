@@ -9,7 +9,7 @@
     "run:warn": "TOOLROUTE_STRICT=0 tsx run.ts"
   },
   "peerDependencies": {
-    "ai": ">=6.0.0 <7",
+    "ai": "^7.0.0",
     "zod": ">=3.23.0 <5"
   }
 }
